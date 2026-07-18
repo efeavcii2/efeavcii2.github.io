@@ -4,57 +4,331 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>efeavcii2 — CTF Writeups</title>
+<meta name="description" content="Siber güvenlik lab notları ve CTF writeup'ları.">
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap');
+
   :root{
-    --bg:#F2F3F6; --surface:#FFFFFF; --ink:#12151C; --ink-soft:#545B6B;
-    --line:#D7DAE2; --accent:#A87C1E;
+    --bg:#050807;
+    --bg-2:#080c0a;
+    --panel:#0b120e;
+    --panel-2:#0e1712;
+    --line:#16281d;
+    --line-bright:#1f3a28;
+    --text:#d6e4da;
+    --muted:#5d7568;
+    --muted-2:#3d4e43;
+    --green:#39ff88;
+    --green-dim:#1f8a4c;
+    --green-glow: rgba(57,255,136,.35);
+    --amber:#ffb454;
+    --red:#ff5f6b;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Consolas, monospace;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   }
-  @media (prefers-color-scheme: dark){
-    :root{ --bg:#0B0E14; --surface:#12151D; --ink:#E7E9EF; --ink-soft:#9AA3B5; --line:#232838; --accent:#D9B453; }
-  }
+
   *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
   body{
-    margin:0; background:var(--bg); color:var(--ink);
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-    line-height:1.6;
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:var(--sans); line-height:1.6; overflow-x:hidden;
+    position:relative;
   }
-  .wrap{max-width:680px; margin:0 auto; padding:72px 24px 96px;}
-  h1{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif; font-size:2.2rem; margin:0 0 6px;}
-  p.dek{color:var(--ink-soft); margin:0 0 40px; max-width:56ch;}
-  .list{display:flex; flex-direction:column; gap:1px; background:var(--line); border:1px solid var(--line); border-radius:10px; overflow:hidden;}
-  a.item{
+
+  /* faint scanline / grid atmosphere */
+  body::before{
+    content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+    background-image:
+      linear-gradient(rgba(57,255,136,.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(57,255,136,.035) 1px, transparent 1px);
+    background-size: 42px 42px;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 40%, transparent 90%);
+  }
+  body::after{
+    content:''; position:fixed; inset:0; pointer-events:none; z-index:1;
+    background: repeating-linear-gradient(
+      0deg, rgba(0,0,0,0) 0, rgba(0,0,0,0) 2px, rgba(0,0,0,.12) 3px, rgba(0,0,0,0) 4px
+    );
+    opacity:.35;
+  }
+
+  a{color:var(--green); text-decoration:none;}
+  ::selection{background:var(--green-dim); color:#04120a;}
+
+  :focus-visible{
+    outline:2px solid var(--green);
+    outline-offset:3px;
+    border-radius:2px;
+  }
+
+  .wrap{max-width:920px; margin:0 auto; padding:0 24px; position:relative; z-index:2;}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    min-height:92vh; display:flex; flex-direction:column; justify-content:center;
+    padding:80px 0 60px; position:relative;
+  }
+  .prompt-line{
+    font-family:var(--mono); font-size:.82rem; color:var(--muted); margin-bottom:22px;
+    letter-spacing:.02em;
+  }
+  .prompt-line .path{color:var(--green-dim);}
+  .prompt-line .sep{color:var(--muted-2); margin:0 2px;}
+
+  .terminal{
+    font-family:var(--mono); white-space:pre-wrap; word-break:break-word;
+    font-size:clamp(1.05rem, 3.4vw, 1.55rem); line-height:1.55; color:var(--text);
+    min-height:6.5em;
+  }
+  .terminal .k{color:var(--green); font-weight:700;}
+  .terminal .c{color:var(--muted);}
+  .cursor{
+    display:inline-block; width:.55em; height:1em; background:var(--green);
+    vertical-align:text-bottom; margin-left:2px; animation:blink 1s steps(1) infinite;
+    box-shadow:0 0 8px var(--green-glow);
+  }
+  @keyframes blink{50%{opacity:0;}}
+
+  .hero-tag{
+    margin-top:26px; color:var(--muted); font-size:1rem; max-width:56ch;
+  }
+  .hero-tag b{color:var(--text); font-weight:600;}
+
+  .hero-links{
+    margin-top:34px; display:flex; gap:14px; flex-wrap:wrap;
+    font-family:var(--mono); font-size:.82rem;
+  }
+  .hero-links a{
+    border:1px solid var(--line-bright); padding:9px 16px; border-radius:6px;
+    color:var(--green); transition:.2s ease; background:rgba(57,255,136,.03);
+  }
+  .hero-links a:hover{
+    background:rgba(57,255,136,.1); box-shadow:0 0 18px var(--green-glow);
+    border-color:var(--green-dim); transform:translateY(-1px);
+  }
+
+  .scroll-hint{
+    position:absolute; bottom:18px; left:0; font-family:var(--mono); font-size:.72rem;
+    color:var(--muted-2); display:flex; align-items:center; gap:8px;
+  }
+  .scroll-hint .arrow{animation:down 1.6s ease-in-out infinite;}
+  @keyframes down{0%,100%{transform:translateY(0);}50%{transform:translateY(5px);}}
+
+  /* ---------- SECTION LABEL ---------- */
+  .section-label{
+    font-family:var(--mono); font-size:.75rem; letter-spacing:.16em; text-transform:uppercase;
+    color:var(--green-dim); margin:0 0 6px;
+  }
+  .section-title{
+    font-size:1.5rem; margin:0 0 8px; font-weight:600; color:var(--text);
+  }
+  .section-desc{color:var(--muted); margin:0 0 36px; max-width:60ch; font-size:.95rem;}
+
+  section.block{padding:64px 0; border-top:1px solid var(--line);}
+
+  /* ---------- WRITEUP CARDS ---------- */
+  .grid{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media (max-width:700px){ .grid{grid-template-columns:1fr;} }
+
+  .card{
+    position:relative; background:var(--panel); border:1px solid var(--line);
+    border-radius:10px; overflow:hidden; text-decoration:none; color:var(--text);
+    transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+    display:flex; flex-direction:column;
+  }
+  .card:hover{
+    transform:translateY(-4px);
+    border-color:var(--green-dim);
+    box-shadow:0 12px 32px -12px rgba(0,0,0,.6), 0 0 0 1px rgba(57,255,136,.15), 0 0 24px var(--green-glow);
+  }
+  .card:hover .card-title{color:var(--green);}
+  .card:hover .card-arrow{transform:translateX(3px); opacity:1;}
+
+  .card-bar{
+    display:flex; align-items:center; gap:6px; padding:10px 14px;
+    border-bottom:1px solid var(--line); background:var(--panel-2);
+  }
+  .dot{width:9px; height:9px; border-radius:50%; display:inline-block;}
+  .dot.r{background:#ff5f56;} .dot.y{background:#ffbd2e;} .dot.g{background:#27c93f;}
+  .card-bar .fname{
+    margin-left:auto; font-family:var(--mono); font-size:.7rem; color:var(--muted-2);
+  }
+
+  .card-body{padding:18px 18px 20px; flex:1; display:flex; flex-direction:column;}
+  .card-title{
+    font-family:var(--mono); font-weight:700; font-size:1.05rem; margin:0 0 8px;
+    color:var(--text); transition:color .2s ease;
+  }
+  .card-meta{font-size:.85rem; color:var(--muted); margin:0 0 14px; flex:1;}
+  .card-tags{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px;}
+  .tag{
+    font-family:var(--mono); font-size:.68rem; padding:3px 8px; border-radius:4px;
+    border:1px solid var(--line-bright); color:var(--muted); letter-spacing:.02em;
+  }
+  .tag.diff-easy{color:#4ade80; border-color:#1f6b3d;}
+  .tag.diff-med{color:var(--amber); border-color:#8a5a1f;}
+  .tag.diff-crit{color:var(--red); border-color:#7a2530;}
+
+  .card-foot{
     display:flex; justify-content:space-between; align-items:center;
-    background:var(--surface); padding:18px 20px; text-decoration:none; color:var(--ink);
+    font-family:var(--mono); font-size:.75rem; color:var(--green-dim);
   }
-  a.item:hover{background:var(--bg);}
-  a.item .t{font-weight:600;}
-  a.item .m{font-family:ui-monospace,SFMono-Regular,Consolas,monospace; font-size:.75rem; color:var(--ink-soft);}
-  footer{margin-top:48px; color:var(--ink-soft); font-size:.85rem;}
+  .card-arrow{opacity:.5; transition:.2s ease; display:inline-block;}
+
+  /* ---------- FOOTER ---------- */
+  footer{
+    padding:48px 0 60px; color:var(--muted-2); font-size:.8rem; font-family:var(--mono);
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;
+  }
+  footer a{color:var(--muted); }
+  footer a:hover{color:var(--green);}
+
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    .cursor, .scroll-hint .arrow{animation:none;}
+    .card, .hero-links a{transition:none;}
+  }
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <h1>efeavcii2</h1>
-    <p class="dek">CTF & lab çalışmalarımdan writeup ve notlar.</p>
-    <div class="list">
-      <a class="item" href="writeups/orion.html">
-        <span class="t">HTB — Orion</span>
-        <span class="m">Very Easy · CraftCMS RCE</span>
-      </a>
-      <a class="item" href="writeups/kb-vuln-4.html">
-        <span class="t">KB-VULN-4</span>
-        <span class="m">Kişisel Lab · Textpattern CMS · LXD Privesc</span>
-      </a>
-      <a class="item" href="writeups/kb-vuln-2.html">
-        <span class="t">KB-VULN-2</span>
-        <span class="m">Kişisel Lab · SMB · WordPress RCE · Sudoers Misconfig</span>
-      </a>
-      <a class="item" href="writeups/kb-vuln-3.html">
-        <span class="t">KB-VULN-3</span>
-        <span class="m">Kişisel Lab · Sitemagic CMS · PwnKit (CVE-2021-4034)</span>
-      </a>
+
+<div class="wrap">
+
+  <section class="hero">
+    <div class="prompt-line"><span class="path">guest@kb-server</span><span class="sep">:</span>~<span class="sep">$</span> ./whoami.sh</div>
+    <h1 class="terminal" id="typed" aria-label="efeavcii2 — offensive security &amp; CTF notları"></h1>
+    <p class="hero-tag">HTB kutuları ve kişisel lab ortamlarında topladığım <b>sızma testi</b> notları. Recon'dan root'a — adım adım, kanıtlarıyla.</p>
+    <div class="hero-links">
+      <a href="#writeups">writeups/</a>
+      <a href="https://github.com/efeavcii2" target="_blank" rel="noopener">github.com/efeavcii2</a>
     </div>
-    <footer>github.com/efeavcii2</footer>
-  </div>
+    <div class="scroll-hint"><span class="arrow">↓</span> scroll</div>
+  </section>
+
+  <section class="block" id="writeups">
+    <p class="section-label">./writeups</p>
+    <h2 class="section-title">Sızma Testi Raporları</h2>
+    <p class="section-desc">Her rapor recon'dan root'a kadar tüm zinciri, kullanılan araçları ve kanıtlarıyla birlikte içerir.</p>
+
+    <div class="grid">
+
+      <a class="card" href="writeups/orion.html">
+        <div class="card-bar">
+          <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+          <span class="fname">orion.html</span>
+        </div>
+        <div class="card-body">
+          <h3 class="card-title">HTB — Orion</h3>
+          <p class="card-meta">CraftCMS RCE üzerinden ilk erişim ve sistem ele geçirme.</p>
+          <div class="card-tags">
+            <span class="tag diff-easy">Very Easy</span>
+            <span class="tag">RCE</span>
+            <span class="tag">CraftCMS</span>
+          </div>
+          <div class="card-foot"><span>HTB Machine</span><span class="card-arrow">→</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="writeups/kb-vuln-4.html">
+        <div class="card-bar">
+          <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+          <span class="fname">kb-vuln-4.html</span>
+        </div>
+        <div class="card-body">
+          <h3 class="card-title">KB-VULN-4</h3>
+          <p class="card-meta">GitHub OSINT, steganografi ile parola deşifresi ve LXD grubu üzerinden yetki yükseltme.</p>
+          <div class="card-tags">
+            <span class="tag diff-crit">Kritik</span>
+            <span class="tag">Textpattern CMS</span>
+            <span class="tag">LXD Privesc</span>
+          </div>
+          <div class="card-foot"><span>Kişisel Lab</span><span class="card-arrow">→</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="writeups/kb-vuln-3.html">
+        <div class="card-bar">
+          <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+          <span class="fname">kb-vuln-3.html</span>
+        </div>
+        <div class="card-body">
+          <h3 class="card-title">KB-VULN-3</h3>
+          <p class="card-meta">SMB anonim erişim, çevrimdışı parola kırma ve PwnKit (CVE-2021-4034) ile root.</p>
+          <div class="card-tags">
+            <span class="tag diff-med">Yüksek</span>
+            <span class="tag">Sitemagic CMS</span>
+            <span class="tag">PwnKit</span>
+          </div>
+          <div class="card-foot"><span>Kişisel Lab</span><span class="card-arrow">→</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="writeups/kb-vuln-2.html">
+        <div class="card-bar">
+          <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+          <span class="fname">kb-vuln-2.html</span>
+        </div>
+        <div class="card-body">
+          <h3 class="card-title">KB-VULN-2</h3>
+          <p class="card-meta">SMB üzerinden sızan kimlik bilgileriyle WordPress RCE ve hatalı sudoers yapılandırması.</p>
+          <div class="card-tags">
+            <span class="tag diff-crit">Kritik</span>
+            <span class="tag">WordPress</span>
+            <span class="tag">Sudoers Misconfig</span>
+          </div>
+          <div class="card-foot"><span>Kişisel Lab</span><span class="card-arrow">→</span></div>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <footer>
+    <span>&copy; 2026 efeavcii2</span>
+    <a href="https://github.com/efeavcii2" target="_blank" rel="noopener">github.com/efeavcii2</a>
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  var el = document.getElementById('typed');
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var full = [
+    {t:"efe@avci", cls:"k"},
+    {t:" — offensive security\n", cls:""},
+    {t:"& CTF notları", cls:"k"}
+  ];
+
+  if(reduce){
+    el.innerHTML = 'efe@avci — offensive security<br><span class="k">&amp; CTF notları</span>';
+    return;
+  }
+
+  var text = "efe@avci — offensive security\n& CTF notları";
+  var i = 0;
+  var speed = 32;
+
+  function render(sub){
+    // wrap "efe@avci" and "& CTF notları" segment in green once typed
+    var out = sub
+      .replace(/^efe@avci/, '<span class="k">efe@avci</span>')
+      .replace(/(&amp;|&) CTF notları/, '<span class="k">$1 CTF notları</span>');
+    el.innerHTML = out.replace(/\n/g,'<br>') + '<span class="cursor"></span>';
+  }
+
+  function tick(){
+    i++;
+    render(text.slice(0,i));
+    if(i < text.length){
+      setTimeout(tick, speed);
+    }
+  }
+  render('');
+  setTimeout(tick, 300);
+})();
+</script>
+
 </body>
 </html>
