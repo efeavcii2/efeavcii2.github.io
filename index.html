@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>efeavcii2 — CTF Writeups</title>
+<style>
+  :root{
+    --bg:#F2F3F6; --surface:#FFFFFF; --ink:#12151C; --ink-soft:#545B6B;
+    --line:#D7DAE2; --accent:#A87C1E;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#0B0E14; --surface:#12151D; --ink:#E7E9EF; --ink-soft:#9AA3B5; --line:#232838; --accent:#D9B453; }
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;
+  }
+  .wrap{max-width:680px; margin:0 auto; padding:72px 24px 96px;}
+  h1{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif; font-size:2.2rem; margin:0 0 6px;}
+  p.dek{color:var(--ink-soft); margin:0 0 40px; max-width:56ch;}
+  .list{display:flex; flex-direction:column; gap:1px; background:var(--line); border:1px solid var(--line); border-radius:10px; overflow:hidden;}
+  a.item{
+    display:flex; justify-content:space-between; align-items:center;
+    background:var(--surface); padding:18px 20px; text-decoration:none; color:var(--ink);
+  }
+  a.item:hover{background:var(--bg);}
+  a.item .t{font-weight:600;}
+  a.item .m{font-family:ui-monospace,SFMono-Regular,Consolas,monospace; font-size:.75rem; color:var(--ink-soft);}
+  footer{margin-top:48px; color:var(--ink-soft); font-size:.85rem;}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>efeavcii2</h1>
+    <p class="dek">CTF & lab çalışmalarımdan writeup ve notlar.</p>
+    <div class="list">
+      <a class="item" href="writeups/orion.html">
+        <span class="t">HTB — Orion</span>
+        <span class="m">Very Easy · CraftCMS RCE</span>
+      </a>
+    </div>
+    <footer>github.com/efeavcii2</footer>
+  </div>
+</body>
+</html>

