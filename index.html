@@ -175,6 +175,32 @@
   }
   .card-arrow{opacity:.5; transition:.2s ease; display:inline-block;}
 
+  /* ---------- ABOUT ---------- */
+  .about-text{font-size:1rem; color:var(--text); max-width:64ch; margin:0 0 18px;}
+  .about-text b{color:var(--green); font-weight:600;}
+  .focus-list{display:flex; flex-wrap:wrap; gap:10px; margin-top:22px;}
+  .focus-item{
+    font-family:var(--mono); font-size:.8rem; color:var(--muted);
+    border-left:2px solid var(--green-dim); padding:4px 0 4px 12px;
+  }
+
+  /* ---------- SKILLS ---------- */
+  .skills-groups{display:flex; flex-direction:column; gap:26px;}
+  .skill-group-label{
+    font-family:var(--mono); font-size:.72rem; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--muted); margin:0 0 12px;
+  }
+  .skill-pills{display:flex; flex-wrap:wrap; gap:9px;}
+  .pill{
+    font-family:var(--mono); font-size:.8rem; padding:7px 14px; border-radius:20px;
+    border:1px solid var(--line-bright); color:var(--text); background:var(--panel);
+    transition:.2s ease; cursor:default;
+  }
+  .pill:hover{
+    border-color:var(--green-dim); color:var(--green);
+    box-shadow:0 0 14px var(--green-glow); transform:translateY(-2px);
+  }
+
   /* ---------- FOOTER ---------- */
   footer{
     padding:48px 0 60px; color:var(--muted-2); font-size:.8rem; font-family:var(--mono);
@@ -199,10 +225,24 @@
     <h1 class="terminal" id="typed" aria-label="efeavcii2 — offensive security &amp; CTF notları"></h1>
     <p class="hero-tag">HTB kutuları ve kişisel lab ortamlarında topladığım <b>sızma testi</b> notları. Recon'dan root'a — adım adım, kanıtlarıyla.</p>
     <div class="hero-links">
+      <a href="#about">about/</a>
       <a href="#writeups">writeups/</a>
+      <a href="#skills">skills/</a>
       <a href="https://github.com/efeavcii2" target="_blank" rel="noopener">github.com/efeavcii2</a>
     </div>
     <div class="scroll-hint"><span class="arrow">↓</span> scroll</div>
+  </section>
+
+  <section class="block" id="about">
+    <p class="section-label">./about</p>
+    <h2 class="section-title">Kimim</h2>
+    <p class="about-text">Bilgisayar Mühendisliği'nden yeni mezun oldum. Odağım <b>offensive security</b> — özellikle <b>red team operasyonları</b> ve sızma testi. Bu site, o yöne ilerlerken çözdüğüm makinelerin ve öğrendiğim tekniklerin bir kaydı.</p>
+    <p class="about-text">Kod okuyup zafiyet görmeyi, bir sistemin nasıl kırılabileceğini adım adım düşünmeyi seviyorum. Şu an hedefim CTF pratiğini gerçek sızma testi metodolojisiyle birleştirip bu alanda profesyonel olarak çalışmak.</p>
+    <div class="focus-list">
+      <span class="focus-item">Red Team / Offensive Security</span>
+      <span class="focus-item">Sızma Testi</span>
+      <span class="focus-item">Sürekli Öğrenme &amp; CTF Pratiği</span>
+    </div>
   </section>
 
   <section class="block" id="writeups">
@@ -297,6 +337,67 @@
         </div>
       </a>
 
+    </div>
+  </section>
+
+  <section class="block" id="skills">
+    <p class="section-label">./skills</p>
+    <h2 class="section-title">Yetkinlikler</h2>
+    <p class="section-desc">Writeup'larda uygulanan tekniklerden derlenmiştir.</p>
+
+    <div class="skills-groups">
+      <div>
+        <p class="skill-group-label">Web Application Security</p>
+        <div class="skill-pills">
+          <span class="pill">OWASP Top 10</span>
+          <span class="pill">Authentication &amp; Session Attacks</span>
+          <span class="pill">File Upload Vulnerabilities</span>
+          <span class="pill">Injection (SQLi, Command Injection)</span>
+          <span class="pill">Broken Access Control</span>
+        </div>
+      </div>
+
+      <div>
+        <p class="skill-group-label">Network Penetration Testing</p>
+        <div class="skill-pills">
+          <span class="pill">Network Reconnaissance &amp; Enumeration</span>
+          <span class="pill">Service Fingerprinting</span>
+          <span class="pill">SMB / FTP / RPC Enumeration</span>
+          <span class="pill">Lateral Movement</span>
+        </div>
+      </div>
+
+      <div>
+        <p class="skill-group-label">Privilege Escalation</p>
+        <div class="skill-pills">
+          <span class="pill">Linux Privilege Escalation</span>
+          <span class="pill">Kernel &amp; Service Exploits</span>
+          <span class="pill">Misconfiguration Abuse</span>
+          <span class="pill">Credential Reuse</span>
+        </div>
+      </div>
+
+      <div>
+        <p class="skill-group-label">Recon &amp; Intelligence</p>
+        <div class="skill-pills">
+          <span class="pill">OSINT</span>
+          <span class="pill">Password Cracking</span>
+          <span class="pill">Steganography</span>
+          <span class="pill">Vulnerability Research</span>
+        </div>
+      </div>
+
+      <div>
+        <p class="skill-group-label">Araçlar</p>
+        <div class="skill-pills">
+          <span class="pill">Nmap</span>
+          <span class="pill">Burp Suite</span>
+          <span class="pill">Metasploit</span>
+          <span class="pill">John the Ripper / Hashcat</span>
+          <span class="pill">NetExec</span>
+          <span class="pill">Wireshark</span>
+        </div>
+      </div>
     </div>
   </section>
 
