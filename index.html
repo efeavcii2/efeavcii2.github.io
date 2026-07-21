@@ -35,7 +35,6 @@
     position:relative;
   }
 
-  /* faint scanline / grid atmosphere */
   body::before{
     content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
     background-image:
@@ -63,7 +62,6 @@
 
   .wrap{max-width:920px; margin:0 auto; padding:0 24px; position:relative; z-index:2;}
 
-  /* ---------- HERO ---------- */
   .hero{
     min-height:92vh; display:flex; flex-direction:column; justify-content:center;
     padding:80px 0 60px; position:relative;
@@ -114,7 +112,6 @@
   .scroll-hint .arrow{animation:down 1.6s ease-in-out infinite;}
   @keyframes down{0%,100%{transform:translateY(0);}50%{transform:translateY(5px);}}
 
-  /* ---------- SECTION LABEL ---------- */
   .section-label{
     font-family:var(--mono); font-size:.75rem; letter-spacing:.16em; text-transform:uppercase;
     color:var(--green-dim); margin:0 0 6px;
@@ -126,7 +123,6 @@
 
   section.block{padding:64px 0; border-top:1px solid var(--line);}
 
-  /* ---------- WRITEUP CARDS ---------- */
   .grid{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
   @media (max-width:700px){ .grid{grid-template-columns:1fr;} }
 
@@ -176,7 +172,6 @@
   }
   .card-arrow{opacity:.5; transition:.2s ease; display:inline-block;}
 
-  /* ---------- ABOUT ---------- */
   .about-text{font-size:1rem; color:var(--text); max-width:64ch; margin:0 0 18px;}
   .about-text b{color:var(--green); font-weight:600;}
   .focus-list{display:flex; flex-wrap:wrap; gap:10px; margin-top:22px;}
@@ -185,7 +180,32 @@
     border-left:2px solid var(--green-dim); padding:4px 0 4px 12px;
   }
 
-  /* ---------- SKILLS ---------- */
+  /* ============================================= */
+  /* YENİ: Stats Strip                              */
+  /* ============================================= */
+  .stats-strip{
+    display:grid; grid-template-columns:repeat(4, 1fr); gap:1px;
+    background:var(--line); border:1px solid var(--line); border-radius:10px;
+    overflow:hidden; margin-top:32px;
+  }
+  @media (max-width:600px){ .stats-strip{ grid-template-columns:repeat(2, 1fr); } }
+  .stat-item{
+    background:var(--panel); padding:20px 14px; text-align:center;
+    transition:.2s ease;
+  }
+  .stat-item:hover{
+    background:var(--panel-2); box-shadow:inset 0 0 24px var(--green-glow);
+  }
+  .stat-num{
+    display:block; font-family:var(--mono); font-weight:800; font-size:1.9rem;
+    color:var(--green); text-shadow:0 0 16px var(--green-glow);
+  }
+  .stat-label{
+    display:block; font-family:var(--mono); font-size:.68rem; color:var(--muted);
+    text-transform:uppercase; letter-spacing:.1em; margin-top:4px;
+  }
+  /* ============================================= */
+
   .skills-groups{display:flex; flex-direction:column; gap:26px;}
   .skill-group-label{
     font-family:var(--mono); font-size:.72rem; letter-spacing:.1em; text-transform:uppercase;
@@ -202,7 +222,6 @@
     box-shadow:0 0 14px var(--green-glow); transform:translateY(-2px);
   }
 
-  /* ---------- FOOTER ---------- */
   footer{
     padding:48px 0 60px; color:var(--muted-2); font-size:.8rem; font-family:var(--mono);
     display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;
@@ -245,6 +264,26 @@
       <span class="focus-item">Sızma Testi</span>
       <span class="focus-item">Sürekli Öğrenme &amp; CTF Pratiği</span>
     </div>
+
+    <!-- YENİ: Stats Strip — sayılar JS ile aşağıdaki kartlardan otomatik hesaplanır -->
+    <div class="stats-strip" id="statsStrip">
+      <div class="stat-item">
+        <span class="stat-num" id="statTotal">0</span>
+        <span class="stat-label">Machines Solved</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num" id="statHtb">0</span>
+        <span class="stat-label">HTB</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num" id="statLab">0</span>
+        <span class="stat-label">Personal Lab</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num" id="statTools">0</span>
+        <span class="stat-label">Tools Built</span>
+      </div>
+    </div>
   </section>
 
   <section class="block" id="writeups">
@@ -254,7 +293,7 @@
 
     <div class="grid">
 
-      <a class="card" href="writeups/principal.html">
+      <a class="card" href="writeups/principal.html" data-category="htb">
         <div class="card-bar">
           <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
           <span class="fname">principal.html</span>
@@ -271,7 +310,7 @@
         </div>
       </a>
 
-      <a class="card" href="writeups/orion.html">
+      <a class="card" href="writeups/orion.html" data-category="htb">
         <div class="card-bar">
           <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
           <span class="fname">orion.html</span>
@@ -288,7 +327,7 @@
         </div>
       </a>
 
-      <a class="card" href="writeups/kb-vuln-4.html">
+      <a class="card" href="writeups/kb-vuln-4.html" data-category="lab">
         <div class="card-bar">
           <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
           <span class="fname">kb-vuln-4.html</span>
@@ -305,7 +344,7 @@
         </div>
       </a>
 
-      <a class="card" href="writeups/kb-vuln-3.html">
+      <a class="card" href="writeups/kb-vuln-3.html" data-category="lab">
         <div class="card-bar">
           <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
           <span class="fname">kb-vuln-3.html</span>
@@ -322,7 +361,7 @@
         </div>
       </a>
 
-      <a class="card" href="writeups/kb-vuln-2.html">
+      <a class="card" href="writeups/kb-vuln-2.html" data-category="lab">
         <div class="card-bar">
           <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
           <span class="fname">kb-vuln-2.html</span>
@@ -349,7 +388,7 @@
 
     <div class="grid">
 
-      <a class="card" href="tools/hash-cracker.html">
+      <a class="card" href="tools/hash-cracker.html" data-category="tool">
         <div class="card-bar">
           <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
           <span class="fname">hash_cracker.py</span>
@@ -366,7 +405,7 @@
         </div>
       </a>
 
-      <a class="card" href="tools/ssh-bruteforcer.html">
+      <a class="card" href="tools/ssh-bruteforcer.html" data-category="tool">
         <div class="card-bar">
           <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
           <span class="fname">ssh_bruteforcer.py</span>
@@ -475,7 +514,6 @@
   var speed = 32;
 
   function render(sub){
-    // wrap "efe@avci" and "& CTF notları" segment in green once typed
     var out = sub
       .replace(/^efe@avci/, '<span class="k">efe@avci</span>')
       .replace(/(&amp;|&) CTF notları/, '<span class="k">$1 CTF notları</span>');
@@ -491,6 +529,52 @@
   }
   render('');
   setTimeout(tick, 300);
+})();
+
+// ============================================= //
+// YENİ: Stats Strip otomatik sayım               //
+// .card[data-category="htb"|"lab"|"tool"] sayısına
+// bakarak stats-strip'i doldurur. Yeni bir writeup
+// veya proje kartı eklediğinde (data-category
+// attribute'unu unutma) sayılar otomatik güncellenir.
+// ============================================= //
+(function(){
+  var htbCount  = document.querySelectorAll('.card[data-category="htb"]').length;
+  var labCount  = document.querySelectorAll('.card[data-category="lab"]').length;
+  var toolCount = document.querySelectorAll('.card[data-category="tool"]').length;
+  var total = htbCount + labCount;
+
+  function animateNum(id, target){
+    var el = document.getElementById(id);
+    if(!el) return;
+    var start = 0;
+    var duration = 700;
+    var startTime = null;
+    function step(ts){
+      if(!startTime) startTime = ts;
+      var progress = Math.min((ts - startTime) / duration, 1);
+      el.textContent = Math.floor(progress * target);
+      if(progress < 1){
+        requestAnimationFrame(step);
+      } else {
+        el.textContent = target;
+      }
+    }
+    requestAnimationFrame(step);
+  }
+
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduceMotion){
+    document.getElementById('statTotal').textContent = total;
+    document.getElementById('statHtb').textContent = htbCount;
+    document.getElementById('statLab').textContent = labCount;
+    document.getElementById('statTools').textContent = toolCount;
+  } else {
+    animateNum('statTotal', total);
+    animateNum('statHtb', htbCount);
+    animateNum('statLab', labCount);
+    animateNum('statTools', toolCount);
+  }
 })();
 </script>
 
