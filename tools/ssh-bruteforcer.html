@@ -1,0 +1,414 @@
+<title>ssh-bruteforcer — SSH Credential Brute-Force Tool</title>
+<style>
+  :root{
+    --bg:#F2F3F6;
+    --surface:#FFFFFF;
+    --surface-2:#E8EAF0;
+    --ink:#12151C;
+    --ink-soft:#545B6B;
+    --line:#D7DAE2;
+    --accent:#A87C1E;
+    --accent-ink:#FFFFFF;
+    --term-bg:#0D1117;
+    --term-ink:#C9D1D9;
+    --term-dim:#7D8590;
+    --good:#2E7D4F;
+    --crit:#B54747;
+    --shadow: 0 1px 2px rgba(18,21,28,0.04), 0 8px 24px -12px rgba(18,21,28,0.12);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0B0E14;
+      --surface:#12151D;
+      --surface-2:#171B26;
+      --ink:#E7E9EF;
+      --ink-soft:#9AA3B5;
+      --line:#232838;
+      --accent:#D9B453;
+      --accent-ink:#14151A;
+      --term-bg:#08090D;
+      --term-ink:#C9D1D9;
+      --term-dim:#6B7280;
+      --good:#4CAF7D;
+      --crit:#E07272;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 32px -16px rgba(0,0,0,0.6);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0B0E14; --surface:#12151D; --surface-2:#171B26; --ink:#E7E9EF; --ink-soft:#9AA3B5;
+    --line:#232838; --accent:#D9B453; --accent-ink:#14151A; --term-bg:#08090D; --term-ink:#C9D1D9;
+    --term-dim:#6B7280; --good:#4CAF7D; --crit:#E07272;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 32px -16px rgba(0,0,0,0.6);
+  }
+  :root[data-theme="light"]{
+    --bg:#F2F3F6; --surface:#FFFFFF; --surface-2:#E8EAF0; --ink:#12151C; --ink-soft:#545B6B;
+    --line:#D7DAE2; --accent:#A87C1E; --accent-ink:#FFFFFF; --term-bg:#0D1117; --term-ink:#C9D1D9;
+    --term-dim:#7D8590; --good:#2E7D4F; --crit:#B54747;
+    --shadow: 0 1px 2px rgba(18,21,28,0.04), 0 8px 24px -12px rgba(18,21,28,0.12);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  .page{
+    max-width:760px;
+    margin:0 auto;
+    padding:0 24px 96px;
+  }
+  a{color:var(--accent);}
+  a:focus-visible, button:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+
+  h1,h2,h3{
+    font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    text-wrap:balance;
+    font-weight:600;
+    color:var(--ink);
+  }
+
+  .cover{
+    padding:64px 0 40px;
+    border-bottom:1px solid var(--line);
+    margin-bottom:40px;
+  }
+  .cover-top{
+    display:flex;
+    align-items:center;
+    gap:20px;
+    margin-bottom:28px;
+  }
+  .ssh-icon{
+    width:88px; height:88px;
+    border-radius:50%;
+    background:radial-gradient(circle at 32% 28%, #2B3560, #0B0E1C 72%);
+    box-shadow:var(--shadow);
+    flex:none;
+    display:block;
+  }
+  .ssh-icon .ln{stroke:rgba(160,180,255,0.45); stroke-width:1.4; fill:none;}
+  .ssh-icon .st{fill:#ffffff;}
+  .ssh-icon .st.glow{opacity:.35;}
+  .cover-eyebrow{
+    font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:.72rem;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--accent);
+    margin:0 0 6px;
+  }
+  .cover h1{
+    font-size:2.6rem;
+    margin:0;
+    line-height:1.05;
+  }
+  .cover p.dek{
+    max-width:56ch;
+    color:var(--ink-soft);
+    font-size:1.05rem;
+    margin:18px 0 0;
+  }
+  .meta-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+    border-radius:10px;
+    overflow:hidden;
+    margin-top:32px;
+  }
+  .meta-cell{
+    background:var(--surface);
+    padding:14px 16px;
+  }
+  .meta-cell .k{
+    display:block;
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    font-size:.66rem;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin-bottom:5px;
+  }
+  .meta-cell .v{
+    font-size:.92rem;
+    font-weight:600;
+    font-variant-numeric:tabular-nums;
+  }
+  .meta-cell .v a{color:var(--ink); text-decoration:none; border-bottom:1px dashed var(--line);}
+  .meta-cell .v a:hover{color:var(--accent); border-color:var(--accent);}
+
+  .chain{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:6px;
+    margin:36px 0 8px;
+  }
+  .chain .step{
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    font-size:.72rem;
+    letter-spacing:.03em;
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    color:var(--ink);
+    padding:6px 11px;
+    border-radius:6px;
+    white-space:nowrap;
+  }
+  .chain .arrow{color:var(--ink-soft); font-size:.85rem;}
+
+  section{margin:56px 0;}
+  .section-label{
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    font-size:.72rem;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--accent);
+    margin:0 0 8px;
+  }
+  h2{font-size:1.5rem; margin:0 0 4px;}
+  h3{font-size:1.1rem; margin:28px 0 10px; color:var(--ink);}
+  p{margin:14px 0; max-width:66ch;}
+  ul, ol{margin:14px 0; padding-left:1.3em; max-width:64ch;}
+  li{margin:6px 0;}
+  code.inline{
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    padding:.12em .4em;
+    border-radius:4px;
+    font-size:.87em;
+  }
+
+  .term{
+    background:var(--term-bg);
+    border-radius:10px;
+    box-shadow:var(--shadow);
+    overflow:hidden;
+    margin:18px 0;
+  }
+  .term-bar{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    padding:9px 12px;
+    border-bottom:1px solid rgba(255,255,255,0.06);
+  }
+  .term-bar .dot{width:9px; height:9px; border-radius:50%; background:#4b5062;}
+  .term-title{
+    margin-left:8px;
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    font-size:.7rem;
+    color:var(--term-dim);
+  }
+  .term pre{
+    margin:0;
+    padding:14px 16px 16px;
+    overflow-x:auto;
+    font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:.82rem;
+    line-height:1.6;
+    color:var(--term-ink);
+  }
+  .term .p{color:var(--accent);}
+  .term .c{color:#7EC7A2;}
+  .term .o{color:var(--term-dim);}
+  .term .hit{color:#E8B563;}
+
+  .callout{
+    border-left:3px solid var(--accent);
+    background:var(--surface);
+    border-radius:0 8px 8px 0;
+    padding:14px 18px;
+    margin:18px 0;
+    box-shadow:var(--shadow);
+  }
+  .callout .lbl{
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    font-size:.68rem;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--accent);
+    display:block;
+    margin-bottom:6px;
+  }
+  .callout.crit{border-left-color:var(--crit);}
+  .callout.crit .lbl{color:var(--crit);}
+  .callout.good{border-left-color:var(--good);}
+  .callout.good .lbl{color:var(--good);}
+
+  table.simple{
+    width:100%;
+    border-collapse:collapse;
+    margin:18px 0;
+    font-size:.88rem;
+  }
+  table.simple th, table.simple td{
+    text-align:left;
+    padding:8px 10px;
+    border-bottom:1px solid var(--line);
+    font-variant-numeric:tabular-nums;
+  }
+  table.simple th{
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    font-size:.68rem;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    font-weight:600;
+  }
+
+  .flag{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    font-size:.85rem;
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    padding:8px 12px;
+    border-radius:7px;
+  }
+  .flag .tick{color:var(--good); font-weight:700;}
+
+  footer{
+    margin-top:64px;
+    padding-top:20px;
+    border-top:1px solid var(--line);
+    color:var(--ink-soft);
+    font-size:.82rem;
+  }
+
+  @media (max-width:560px){
+    .meta-grid{grid-template-columns:repeat(2,1fr);}
+    .cover h1{font-size:2rem;}
+  }
+
+  @media print{
+    @page{ margin:14mm; }
+    *{
+      -webkit-print-color-adjust:exact !important;
+      print-color-adjust:exact !important;
+      color-adjust:exact !important;
+    }
+    body{background:#fff;}
+    .page{max-width:none;}
+    .term{box-shadow:none; border:1px solid #333;}
+    .callout{box-shadow:none;}
+    .term, .callout, .meta-grid, .flag{break-inside:avoid;}
+    h2, h3, .section-label{break-after:avoid;}
+    .cover{break-inside:avoid;}
+  }
+</style>
+
+<div class="page">
+
+  <div class="cover">
+    <div class="cover-top">
+      <svg class="ssh-icon" viewBox="0 0 88 88" aria-hidden="true">
+        <g class="ln">
+          <rect x="24" y="40" width="40" height="30" rx="4"/>
+          <path d="M32 40 V28 a12 12 0 0 1 24 0 V40"/>
+        </g>
+        <circle class="st glow" cx="44" cy="54" r="6"/>
+        <circle class="st" cx="24" cy="40" r="2"/>
+        <circle class="st" cx="64" cy="40" r="2"/>
+        <circle class="st glow" cx="44" cy="20" r="5"/>
+      </svg>
+      <div>
+        <p class="cover-eyebrow">Kişisel Proje · Python 3 · CLI Tool</p>
+        <h1>ssh-bruteforcer</h1>
+      </div>
+    </div>
+    <p class="dek">Yetkili pentest/CTF ortamları için SSH kimlik bilgisi brute-force aracı. Kullanıcı adı/parola listelerini bir thread havuzuyla paralel dener; hedefin rate-limit/lockout savunmasını tetiklediğini fark edip kendini durdurabilir.</p>
+
+    <div class="meta-grid">
+      <div class="meta-cell"><span class="k">Dil</span><span class="v">Python 3</span></div>
+      <div class="meta-cell"><span class="k">Yöntem</span><span class="v">Credential Brute-Force</span></div>
+      <div class="meta-cell"><span class="k">Hızlandırma</span><span class="v">Threading (I/O-bound)</span></div>
+      <div class="meta-cell"><span class="k">Repo</span><span class="v"><a href="https://github.com/efeavcii2/ssh-bruteforcer" target="_blank" rel="noopener">GitHub ↗</a></span></div>
+    </div>
+
+    <div class="chain">
+      <span class="step">Userlist × Wordlist</span><span class="arrow">→</span>
+      <span class="step">Thread havuzuna dağıt</span><span class="arrow">→</span>
+      <span class="step">SSH auth denemesi</span><span class="arrow">→</span>
+      <span class="step">Bulunca / lockout görünce dur</span>
+    </div>
+  </div>
+
+  <section>
+    <p class="section-label">01 — Ne yapıyor</p>
+    <h2>SSH kimlik bilgisi brute-force</h2>
+    <p>Bir kullanıcı adı listesi ile bir parola listesini (ya da tek bir kullanıcı adı/parola) çarpraz deneyip hedef SSH sunucusuna karşı test ediyor. <code class="inline">--workers</code> kadar thread eşzamanlı çalışıyor, <code class="inline">--delay</code> ile her denemeden sonra bekleme eklenebiliyor.</p>
+    <p><a href="../tools/hash-cracker.html">hash-cracker</a>'ın devamı niteliğinde bir proje — ikisi de kimlik bilgisi kırma mantığında ama farklı bir eşzamanlılık modeliyle.</p>
+  </section>
+
+  <section>
+    <p class="section-label">02 — Mimari</p>
+    <h2>Neden threading, multiprocessing değil</h2>
+    <p>hash-cracker'da multiprocessing kullanmıştım çünkü hash hesaplama CPU-bound bir işti ve GIL yüzünden threading paralellik sağlamıyordu. Burada durum tam tersi: SSH denemesinin maliyeti CPU'da değil, ağ round-trip'inde ve TCP/SSH handshake'inde (key exchange, vb.) — yani I/O-bound. I/O beklerken Python zaten GIL'i serbest bırakıyor, dolayısıyla <code class="inline">threading</code> burada hem yeterli hem de <code class="inline">multiprocessing</code>'den daha hafif.</p>
+    <ul>
+      <li><code class="inline">modules/ssh_client.py</code> → <code class="inline">try_login()</code>: paramiko ile tek bir bağlantı dener, sonucu dört duruma eşler: <code class="inline">SUCCESS</code>, <code class="inline">FAILED</code>, <code class="inline">RATE_LIMITED</code> (banner okunamadı/bağlantı koptu — hedef bir savunma tetikledi demek), <code class="inline">UNREACHABLE</code>.</li>
+      <li><code class="inline">modules/bruteforcer.py</code> → kombinasyonları bir <code class="inline">queue.Queue</code>'ya doldurup N thread'e dağıtıyor, <code class="inline">threading.Event</code> ile erken çıkış yapıyor. Art arda <code class="inline">RATE_LIMITED</code> belirli bir eşiği geçerse aracı durduruyor — kör kör denemeye devam edip hedefte gürültü yaratmıyor.</li>
+    </ul>
+  </section>
+
+  <section>
+    <p class="section-label">03 — Gerçek test</p>
+    <h2>Kendi kurduğum SSH hedefine karşı</h2>
+    <p>Localhost'ta 2222 portunda, tek kullanımlık bir test kullanıcısıyla (<code class="inline">sshtestuser</code> / <code class="inline">test1234</code>) kendi SSH sunucumu ayağa kaldırıp araca karşı gerçekten çalıştırdım.</p>
+
+    <div class="term">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="term-title">başarılı bulma</span></div>
+      <pre><span class="p">$</span> python3 main.py --target 127.0.0.1 --port 2222 --username sshtestuser --workers 4
+
+<span class="hit">[+] KIMLIK BILGISI BULUNDU: sshtestuser : test1234</span>
+[i] Durum            : kimlik bilgisi bulundu
+[i] Geçen süre       : 18.09 saniye
+[i] Denenen kombinasyon: 20
+[i] Hız (attempt/sec): 1.11</pre>
+    </div>
+
+    <p>~1.1 attempt/sn — hash-cracker'daki milyonlarca hash/sn ile karşılaştırınca çok düşük ama beklenen: her deneme gerçek bir TCP bağlantısı + SSH key exchange + auth round-trip'i gerektiriyor, tek bir hash hesaplamaktan çok daha pahalı.</p>
+
+    <div class="callout">
+      <span class="lbl">Beklenmedik bulgu — sshd'nin kendi savunması</span>
+      Testin ilk turunda (varsayılan sshd ayarlarıyla) araç sürekli "rate-limit/lockout tespit edildi" diyerek duruyordu. Araştırınca öğrendim: OpenSSH 9.8+ ile gelen <code class="inline">PerSourcePenalties</code> özelliği varsayılan olarak açık — <code class="inline">authfail:5</code>, yani bir authentication hatasından sonra o kaynak IP 5 saniyeliğine cezalandırılıp yeni bağlantıları reddediliyor (fail2ban'a bile gerek yok). Aracın <code class="inline">RATE_LIMITED</code> tespiti bunu doğru yakaladı.
+    </div>
+
+    <div class="term">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="term-title">lockout tespiti (varsayılan sshd ayarları)</span></div>
+      <pre><span class="p">$</span> python3 main.py --target 127.0.0.1 --port 2222 --username sshtestuser --workers 4
+
+<span class="o">[-] Kimlik bilgisi bulunamadı.</span>
+[i] Durum            : rate-limit/lockout tespit edildi, durduruldu
+[i] Geçen süre       : 7.05 saniye
+[i] Denenen kombinasyon: 14
+[i] Hız (attempt/sec): 1.99</pre>
+    </div>
+
+    <div class="flag"><span class="tick">✓</span> her iki senaryo da (bulma + lockout tespiti) gerçek bir SSH hedefine karşı doğrulandı</div>
+  </section>
+
+  <section>
+    <p class="section-label">Özet</p>
+    <h2>Bu projede öğrendiklerim</h2>
+    <ul>
+      <li>I/O-bound bir işte <code class="inline">threading</code>'in <code class="inline">multiprocessing</code>'den neden hem yeterli hem daha hafif olduğu — GIL sadece CPU-bound işlerde paralelliği engelliyor.</li>
+      <li>Modern OpenSSH'ın (9.8+) <code class="inline">PerSourcePenalties</code> ile fail2ban'a ihtiyaç duymadan brute-force'a karşı yerleşik bir savunması olduğu.</li>
+      <li>Gerçek bir hedefe karşı brute-force yaparken <code class="inline">--workers</code>/<code class="inline">--delay</code> ayarının sadece hız için değil, hedefi gereksiz kilitlememek için de önemli olduğu.</li>
+    </ul>
+  </section>
+
+  <footer>
+    Kişisel eğitim/CTF projesi — kaynak kod: <a href="https://github.com/efeavcii2/ssh-bruteforcer" target="_blank" rel="noopener">github.com/efeavcii2/ssh-bruteforcer</a>. Yalnızca kendi sahip olduğun veya izinli sistemlerde kullan.
+  </footer>
+
+</div>
