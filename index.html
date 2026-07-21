@@ -168,6 +168,7 @@
   .tag.diff-easy{color:#4ade80; border-color:#1f6b3d;}
   .tag.diff-med{color:var(--amber); border-color:#8a5a1f;}
   .tag.diff-crit{color:var(--red); border-color:#7a2530;}
+  .tag.type-tool{color:var(--green); border-color:var(--green-dim);}
 
   .card-foot{
     display:flex; justify-content:space-between; align-items:center;
@@ -227,6 +228,7 @@
     <div class="hero-links">
       <a href="#about">about/</a>
       <a href="#writeups">writeups/</a>
+      <a href="#projects">projects/</a>
       <a href="#skills">skills/</a>
       <a href="https://github.com/efeavcii2" target="_blank" rel="noopener">github.com/efeavcii2</a>
     </div>
@@ -334,6 +336,33 @@
             <span class="tag">Sudoers Misconfig</span>
           </div>
           <div class="card-foot"><span>Kişisel Lab</span><span class="card-arrow">→</span></div>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <section class="block" id="projects">
+    <p class="section-label">./projects</p>
+    <h2 class="section-title">Projeler</h2>
+    <p class="section-desc">Pentest/CTF pratiği için yazdığım bağımsız araçlar.</p>
+
+    <div class="grid">
+
+      <a class="card" href="tools/hash-cracker.html">
+        <div class="card-bar">
+          <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+          <span class="fname">hash_cracker.py</span>
+        </div>
+        <div class="card-body">
+          <h3 class="card-title">hash-cracker</h3>
+          <p class="card-meta">Offline hash kırma için multiprocessing destekli dictionary + brute-force CLI aracı.</p>
+          <div class="card-tags">
+            <span class="tag type-tool">Tool</span>
+            <span class="tag">Python</span>
+            <span class="tag">Multiprocessing</span>
+          </div>
+          <div class="card-foot"><span>Kişisel Proje</span><span class="card-arrow">→</span></div>
         </div>
       </a>
 

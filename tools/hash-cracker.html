@@ -1,0 +1,450 @@
+<title>hash-cracker — CLI Password Cracking Tool</title>
+<style>
+  :root{
+    --bg:#F2F3F6;
+    --surface:#FFFFFF;
+    --surface-2:#E8EAF0;
+    --ink:#12151C;
+    --ink-soft:#545B6B;
+    --line:#D7DAE2;
+    --accent:#A87C1E;
+    --accent-ink:#FFFFFF;
+    --term-bg:#0D1117;
+    --term-ink:#C9D1D9;
+    --term-dim:#7D8590;
+    --good:#2E7D4F;
+    --crit:#B54747;
+    --shadow: 0 1px 2px rgba(18,21,28,0.04), 0 8px 24px -12px rgba(18,21,28,0.12);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0B0E14;
+      --surface:#12151D;
+      --surface-2:#171B26;
+      --ink:#E7E9EF;
+      --ink-soft:#9AA3B5;
+      --line:#232838;
+      --accent:#D9B453;
+      --accent-ink:#14151A;
+      --term-bg:#08090D;
+      --term-ink:#C9D1D9;
+      --term-dim:#6B7280;
+      --good:#4CAF7D;
+      --crit:#E07272;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 32px -16px rgba(0,0,0,0.6);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0B0E14; --surface:#12151D; --surface-2:#171B26; --ink:#E7E9EF; --ink-soft:#9AA3B5;
+    --line:#232838; --accent:#D9B453; --accent-ink:#14151A; --term-bg:#08090D; --term-ink:#C9D1D9;
+    --term-dim:#6B7280; --good:#4CAF7D; --crit:#E07272;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 32px -16px rgba(0,0,0,0.6);
+  }
+  :root[data-theme="light"]{
+    --bg:#F2F3F6; --surface:#FFFFFF; --surface-2:#E8EAF0; --ink:#12151C; --ink-soft:#545B6B;
+    --line:#D7DAE2; --accent:#A87C1E; --accent-ink:#FFFFFF; --term-bg:#0D1117; --term-ink:#C9D1D9;
+    --term-dim:#7D8590; --good:#2E7D4F; --crit:#B54747;
+    --shadow: 0 1px 2px rgba(18,21,28,0.04), 0 8px 24px -12px rgba(18,21,28,0.12);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  .page{
+    max-width:760px;
+    margin:0 auto;
+    padding:0 24px 96px;
+  }
+  a{color:var(--accent);}
+  a:focus-visible, button:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+
+  h1,h2,h3{
+    font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    text-wrap:balance;
+    font-weight:600;
+    color:var(--ink);
+  }
+
+  .cover{
+    padding:64px 0 40px;
+    border-bottom:1px solid var(--line);
+    margin-bottom:40px;
+  }
+  .cover-top{
+    display:flex;
+    align-items:center;
+    gap:20px;
+    margin-bottom:28px;
+  }
+  .hash-icon{
+    width:88px; height:88px;
+    border-radius:50%;
+    background:radial-gradient(circle at 32% 28%, #2B3560, #0B0E1C 72%);
+    box-shadow:var(--shadow);
+    flex:none;
+    display:block;
+  }
+  .hash-icon .ln{stroke:rgba(160,180,255,0.45); stroke-width:1.4; fill:none;}
+  .hash-icon .st{fill:#ffffff;}
+  .hash-icon .st.glow{opacity:.35;}
+  .cover-eyebrow{
+    font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:.72rem;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--accent);
+    margin:0 0 6px;
+  }
+  .cover h1{
+    font-size:2.6rem;
+    margin:0;
+    line-height:1.05;
+  }
+  .cover p.dek{
+    max-width:56ch;
+    color:var(--ink-soft);
+    font-size:1.05rem;
+    margin:18px 0 0;
+  }
+  .meta-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+    border-radius:10px;
+    overflow:hidden;
+    margin-top:32px;
+  }
+  .meta-cell{
+    background:var(--surface);
+    padding:14px 16px;
+  }
+  .meta-cell .k{
+    display:block;
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    font-size:.66rem;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin-bottom:5px;
+  }
+  .meta-cell .v{
+    font-size:.92rem;
+    font-weight:600;
+    font-variant-numeric:tabular-nums;
+  }
+  .meta-cell .v a{color:var(--ink); text-decoration:none; border-bottom:1px dashed var(--line);}
+  .meta-cell .v a:hover{color:var(--accent); border-color:var(--accent);}
+
+  .chain{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:6px;
+    margin:36px 0 8px;
+  }
+  .chain .step{
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    font-size:.72rem;
+    letter-spacing:.03em;
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    color:var(--ink);
+    padding:6px 11px;
+    border-radius:6px;
+    white-space:nowrap;
+  }
+  .chain .arrow{color:var(--ink-soft); font-size:.85rem;}
+
+  section{margin:56px 0;}
+  .section-label{
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    font-size:.72rem;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--accent);
+    margin:0 0 8px;
+  }
+  h2{font-size:1.5rem; margin:0 0 4px;}
+  h3{font-size:1.1rem; margin:28px 0 10px; color:var(--ink);}
+  p{margin:14px 0; max-width:66ch;}
+  ul, ol{margin:14px 0; padding-left:1.3em; max-width:64ch;}
+  li{margin:6px 0;}
+  code.inline{
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    padding:.12em .4em;
+    border-radius:4px;
+    font-size:.87em;
+  }
+
+  .term{
+    background:var(--term-bg);
+    border-radius:10px;
+    box-shadow:var(--shadow);
+    overflow:hidden;
+    margin:18px 0;
+  }
+  .term-bar{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    padding:9px 12px;
+    border-bottom:1px solid rgba(255,255,255,0.06);
+  }
+  .term-bar .dot{width:9px; height:9px; border-radius:50%; background:#4b5062;}
+  .term-title{
+    margin-left:8px;
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    font-size:.7rem;
+    color:var(--term-dim);
+  }
+  .term pre{
+    margin:0;
+    padding:14px 16px 16px;
+    overflow-x:auto;
+    font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:.82rem;
+    line-height:1.6;
+    color:var(--term-ink);
+  }
+  .term .p{color:var(--accent);}
+  .term .c{color:#7EC7A2;}
+  .term .o{color:var(--term-dim);}
+  .term .hit{color:#E8B563;}
+
+  .callout{
+    border-left:3px solid var(--accent);
+    background:var(--surface);
+    border-radius:0 8px 8px 0;
+    padding:14px 18px;
+    margin:18px 0;
+    box-shadow:var(--shadow);
+  }
+  .callout .lbl{
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    font-size:.68rem;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--accent);
+    display:block;
+    margin-bottom:6px;
+  }
+  .callout.crit{border-left-color:var(--crit);}
+  .callout.crit .lbl{color:var(--crit);}
+  .callout.good{border-left-color:var(--good);}
+  .callout.good .lbl{color:var(--good);}
+
+  table.simple{
+    width:100%;
+    border-collapse:collapse;
+    margin:18px 0;
+    font-size:.88rem;
+  }
+  table.simple th, table.simple td{
+    text-align:left;
+    padding:8px 10px;
+    border-bottom:1px solid var(--line);
+    font-variant-numeric:tabular-nums;
+  }
+  table.simple th{
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    font-size:.68rem;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    font-weight:600;
+  }
+
+  .flag{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    font-size:.85rem;
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    padding:8px 12px;
+    border-radius:7px;
+  }
+  .flag .tick{color:var(--good); font-weight:700;}
+
+  footer{
+    margin-top:64px;
+    padding-top:20px;
+    border-top:1px solid var(--line);
+    color:var(--ink-soft);
+    font-size:.82rem;
+  }
+
+  @media (max-width:560px){
+    .meta-grid{grid-template-columns:repeat(2,1fr);}
+    .cover h1{font-size:2rem;}
+  }
+
+  @media print{
+    @page{ margin:14mm; }
+    *{
+      -webkit-print-color-adjust:exact !important;
+      print-color-adjust:exact !important;
+      color-adjust:exact !important;
+    }
+    body{background:#fff;}
+    .page{max-width:none;}
+    .term{box-shadow:none; border:1px solid #333;}
+    .callout{box-shadow:none;}
+    .term, .callout, .meta-grid, .flag{break-inside:avoid;}
+    h2, h3, .section-label{break-after:avoid;}
+    .cover{break-inside:avoid;}
+  }
+</style>
+
+<div class="page">
+
+  <div class="cover">
+    <div class="cover-top">
+      <svg class="hash-icon" viewBox="0 0 88 88" aria-hidden="true">
+        <g class="ln">
+          <line x1="32" y1="16" x2="32" y2="72"/>
+          <line x1="56" y1="16" x2="56" y2="72"/>
+          <line x1="16" y1="34" x2="72" y2="34"/>
+          <line x1="16" y1="54" x2="72" y2="54"/>
+        </g>
+        <circle class="st glow" cx="32" cy="16" r="6"/>
+        <circle class="st glow" cx="56" cy="72" r="7"/>
+        <circle class="st" cx="32" cy="34" r="2.2"/>
+        <circle class="st" cx="56" cy="34" r="2.2"/>
+        <circle class="st" cx="32" cy="54" r="2.2"/>
+        <circle class="st" cx="56" cy="54" r="2.2"/>
+      </svg>
+      <div>
+        <p class="cover-eyebrow">Kişisel Proje · Python 3 · CLI Tool</p>
+        <h1>hash-cracker</h1>
+      </div>
+    </div>
+    <p class="dek">Offline ele geçirilmiş hash'leri (dictionary ve brute-force yöntemleriyle) kırmayı simüle eden, <code class="inline">multiprocessing</code> ile hızlandırılmış bir komut satırı aracı. Pentest/CTF pratiklerinde kendi hash'lerimi test etmek için yazdım.</p>
+
+    <div class="meta-grid">
+      <div class="meta-cell"><span class="k">Dil</span><span class="v">Python 3</span></div>
+      <div class="meta-cell"><span class="k">Yöntem</span><span class="v">Dictionary + Bruteforce</span></div>
+      <div class="meta-cell"><span class="k">Hızlandırma</span><span class="v">Multiprocessing</span></div>
+      <div class="meta-cell"><span class="k">Repo</span><span class="v"><a href="https://github.com/efeavcii2/hash-cracker" target="_blank" rel="noopener">GitHub ↗</a></span></div>
+    </div>
+
+    <div class="chain">
+      <span class="step">Wordlist / Charset</span><span class="arrow">→</span>
+      <span class="step">Worker havuzuna böl</span><span class="arrow">→</span>
+      <span class="step">Paralel hash karşılaştırma</span><span class="arrow">→</span>
+      <span class="step">Bulunca erken çıkış</span>
+    </div>
+  </div>
+
+  <section>
+    <p class="section-label">01 — Ne yapıyor</p>
+    <h2>Offline hash kırma simülasyonu</h2>
+    <p>Aracı iki modla çalıştırıyorsun: <code class="inline">--mode dict</code> bir wordlist'i dener, <code class="inline">--mode bruteforce</code> verilen bir karakter kümesinden olası tüm kombinasyonları üretip dener. Hash tipi (<code class="inline">md5</code>, <code class="inline">sha1</code>, <code class="inline">sha256</code>, <code class="inline">sha512</code>, <code class="inline">bcrypt</code>) uzunluk/format bakılarak otomatik tespit ediliyor, istersen <code class="inline">--hash-type</code> ile elle de verebiliyorsun.</p>
+    <p>Amaç canlı bir sisteme saldırmak değil — kendi ürettiğin ya da izinli bir CTF/lab ortamından aldığın hash'leri offline test etmek.</p>
+  </section>
+
+  <section>
+    <p class="section-label">02 — Mimari</p>
+    <h2>Wordlist / kombinasyon uzayı işçiler arasında bölünüyor</h2>
+    <p><code class="inline">modules/hash_utils.py</code> hash tipini tespit ediyor ve bir aday şifreyi hedef hash ile karşılaştırıyor (bcrypt için <code class="inline">bcrypt.checkpw</code>, diğerleri için <code class="inline">hashlib</code>). <code class="inline">modules/cracker.py</code> ise asıl işi yapıyor:</p>
+    <ul>
+      <li><strong>Dictionary attack</strong>: wordlist dosyası okunup satırlar <code class="inline">--workers</code> kadar process'e eşit parçalar halinde dağıtılıyor.</li>
+      <li><strong>Bruteforce attack</strong>: charset<sup>uzunluk</sup> kombinasyon uzayı, adayların <em>ilk karakterine</em> göre process'ler arasında bölüşülüyor (<code class="inline">charset[worker_id::num_workers]</code>). Her process kendi ilk karakteri için geri kalanını <code class="inline">itertools.product</code> ile üretiyor — böylece hiçbir process başkasına ait kombinasyonu tekrar üretmiyor.</li>
+    </ul>
+    <p>Bir process doğru şifreyi bulunca <code class="inline">multiprocessing.Value</code> ile paylaşılan bir flag set ediyor; diğer process'ler bir sonraki kontrol noktasında bunu görüp duruyor, hepsinin işi bitirmesini beklemiyoruz.</p>
+
+    <div class="callout">
+      <span class="lbl">Neden multiprocessing, threading değil</span>
+      Hash hesaplama CPU-bound bir iş, ve CPython'daki GIL yüzünden <code class="inline">threading</code> bu tür işlerde gerçek paralellik sağlamıyor. Ayrı process'ler GIL'i tamamen bypass ediyor.
+    </div>
+  </section>
+
+  <section>
+    <p class="section-label">03 — Kullanım</p>
+    <h2>Üç mod da test edildi</h2>
+
+    <div class="term">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="term-title">dictionary attack — MD5</span></div>
+      <pre><span class="p">$</span> python3 main.py --hash cc03e747a6afbbcbf8be7668acfebee5 --mode dict --workers 4
+<span class="o">[+] Tespit edilen hash tipi: md5</span>
+<span class="hit">[+] SIFRE BULUNDU: test123</span>
+[i] Geçen süre       : 0.03 saniye
+[i] Denenen aday     : 68
+[i] Hız (hashes/sec) : 2186.14</pre>
+    </div>
+
+    <div class="term">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="term-title">bruteforce attack — MD5</span></div>
+      <pre><span class="p">$</span> python3 main.py --hash 749d7048edd2de31c2c7a88d4d196254 \
+    --mode bruteforce --charset abcdefghijklmnopqrstuvwxyz0123456789 \
+    --min-len 1 --max-len 4 --workers 4
+<span class="o">[+] Tespit edilen hash tipi: md5</span>
+<span class="hit">[+] SIFRE BULUNDU: ab12</span>
+[i] Geçen süre       : 0.06 saniye
+[i] Denenen aday     : 58401
+[i] Hız (hashes/sec) : 921216.80</pre>
+    </div>
+
+    <div class="term">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="term-title">dictionary attack — bcrypt</span></div>
+      <pre><span class="p">$</span> python3 main.py --hash '$2b$04$VFlMnPX7xLe.vmZJiAgoDetkn5yj5U2FVgjju8fGKoerxjjh3DGgm' --mode dict
+<span class="o">[+] Tespit edilen hash tipi: bcrypt</span>
+<span class="hit">[+] SIFRE BULUNDU: merhaba123</span>
+[i] Geçen süre       : 0.12 saniye
+[i] Denenen aday     : 346
+[i] Hız (hashes/sec) : 2879.12</pre>
+    </div>
+
+    <div class="flag"><span class="tick">✓</span> smoke test geçti — MD5(test123) dictionary attack ile bulundu</div>
+  </section>
+
+  <section>
+    <p class="section-label">04 — Performans</p>
+    <h2>6 fiziksel çekirdek, 12 mantıksal thread</h2>
+    <p>Kendi makinemde (Ryzen 5 4600H) 62 milyonluk bir bruteforce uzayında (36 karakterlik charset, 1-5 uzunluk, MD5, hash uzayda yok — tam tarama) worker sayısını değiştirerek ölçtüm:</p>
+
+    <table class="simple">
+      <tr><th>Workers</th><th>Süre</th><th>Hız</th></tr>
+      <tr><td>1</td><td>69.9 sn</td><td>~890K hash/sn</td></tr>
+      <tr><td>6</td><td>33.4 sn</td><td>~1.86M hash/sn</td></tr>
+      <tr><td>12</td><td>49.7 sn</td><td>~1.25M hash/sn</td></tr>
+    </table>
+
+    <p>12 worker, 6 worker'dan daha yavaş çıktı. Sebebi: makinede fiziksel çekirdek sayısı 6, geri kalan 6 "thread" aynı çekirdekleri paylaşan SMT (hyperthreading) hatları. Hash hesaplama gibi CPU'yu tamamen dolduran bir işte SMT neredeyse fayda getirmiyor — <code class="inline">--workers</code> için mantıksal thread sayısı yerine fiziksel çekirdek sayısını vermek burada daha hızlı sonuç verdi.</p>
+
+    <p>bcrypt'in neden bu kadar yavaş olduğunu da izole ölçtüm — aynı makinede, aynı anda:</p>
+    <table class="simple">
+      <tr><th>Algoritma</th><th>Hız</th></tr>
+      <tr><td>MD5</td><td>~1.54M hash/sn</td></tr>
+      <tr><td>bcrypt (cost=4, minimum)</td><td>~1.1K hash/sn</td></tr>
+    </table>
+    <p>Yani en düşük maliyet ayarında bile bcrypt, MD5'ten ~1350 kat yavaş — ve bu kasıtlı, bcrypt'in var oluş amacı brute-force'u pahalılaştırmak. Gerçek sistemlerde cost genelde 10-12 kullanılır, her +1 maliyeti ikiye katladığı için bu fark katbekat büyür.</p>
+  </section>
+
+  <section>
+    <p class="section-label">Özet</p>
+    <h2>Bu projede öğrendiklerim</h2>
+    <ul>
+      <li>GIL'in CPU-bound işlerde neden <code class="inline">threading</code>'i işe yaramaz kıldığı ve <code class="inline">multiprocessing</code>'in bunu nasıl bypass ettiği.</li>
+      <li>İş bölüşümünün naif bir şekilde yapılması (tüm uzayı üretip <code class="inline">idx % num_workers</code> ile filtrelemek) gizli bir performans maliyeti getirebiliyor — kombinasyon uzayını doğru bölüştürmek (ilk karaktere göre) gerçek bir hızlanma farkı yarattı.</li>
+      <li>SMT/hyperthreading'in CPU-bound iş yüklerinde fiziksel çekirdek sayısının ötesinde pek fayda sağlamadığı — ölçümle doğruladım.</li>
+      <li>bcrypt gibi kasıtlı yavaş tasarlanmış hash fonksiyonlarının parola saklama için neden MD5/SHA'dan çok daha güvenli olduğu.</li>
+    </ul>
+  </section>
+
+  <footer>
+    Kişisel eğitim/CTF projesi — kaynak kod: <a href="https://github.com/efeavcii2/hash-cracker" target="_blank" rel="noopener">github.com/efeavcii2/hash-cracker</a>. Yalnızca kendi sahip olduğun veya izinli hash'lerde kullan; araç tamamen offline çalışır.
+  </footer>
+
+</div>
