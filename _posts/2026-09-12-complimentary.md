@@ -3,6 +3,7 @@ title: "Complimentary — TryHackMe AWS Cognito Misconfiguration"
 date: 2026-09-12 21:00:00 +0300
 categories: [TryHackMe]
 tags: [aws, cognito, dynamodb, cloud, misconfiguration, tryhackme]
+image: /assets/img/posts/complimentary.png
 ---
 
 > TryHackMe · Hacker Holidays 2026 · Easy · Cloud/AWS

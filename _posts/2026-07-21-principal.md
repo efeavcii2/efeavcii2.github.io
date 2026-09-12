@@ -3,6 +3,7 @@ title: "Principal — HTB Lab Raporu"
 date: 2026-07-21 05:41:00 +0300
 categories: [HTB]
 tags: [jwt, jwe, pac4j, cve-2026-29000, ssh-ca, privesc, linux]
+image: /assets/img/posts/principal.svg
 ---
 
 > Hack The Box · Medium · Linux

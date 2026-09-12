@@ -3,6 +3,7 @@ title: "ssh-bruteforcer — SSH Credential Brute-Force Tool"
 date: 2026-07-21 07:35:00 +0300
 categories: [Projeler]
 tags: [python, threading, ssh, bruteforce]
+image: /assets/img/posts/ssh-bruteforcer.svg
 ---
 
 > Kişisel Proje · Python 3 · CLI Tool

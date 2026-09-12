@@ -3,6 +3,7 @@ title: "LLMborghini — TryHackMe Indirect Prompt Injection"
 date: 2026-09-12 22:00:00 +0300
 categories: [TryHackMe]
 tags: [prompt-injection, ai-security, llm, tryhackme]
+image: /assets/img/posts/llmborghini.png
 ---
 
 > TryHackMe · AI Security · Easy · Indirect Prompt Injection

@@ -3,6 +3,7 @@ title: "hash-cracker — CLI Password Cracking Tool"
 date: 2026-07-21 05:44:00 +0300
 categories: [Projeler]
 tags: [python, multiprocessing, hash-cracking]
+image: /assets/img/posts/hash-cracker.svg
 ---
 
 > Kişisel Proje · Python 3 · CLI Tool
