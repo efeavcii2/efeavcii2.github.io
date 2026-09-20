@@ -1,6 +1,6 @@
 ---
 title: "Linux Privilege Escalation — TryHackMe Sekiz Farklı Privesc Vektörü Tek Yazıda"
-date: 2026-09-20 21:00:00 +0300
+date: 2026-09-20 17:00:00 +0300
 categories: [TryHackMe]
 tags: [linux, privilege-escalation, kernel-exploit, sudo, gtfobins, suid, capabilities, cron, path-hijacking, nfs, pwnkit, john-the-ripper, tryhackme]
 image: /assets/img/posts/linux-privesc.png
